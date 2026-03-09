@@ -8,10 +8,6 @@
 
 CardioVision is a cutting-edge, clinical-grade platform for automated echocardiography analysis. By leveraging advanced computer vision and deep learning, CardioVision provides precise measurements of key cardiac metrics, empowering clinicians with faster, more accurate diagnostic insights.
 
-<p align="center">
-  <img src="imgs/cardiolenspng.png" alt="CardioVision Logo" width="200"/>
-</p>
-
 ---
 
 ## Key Features
