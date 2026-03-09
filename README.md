@@ -49,11 +49,11 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 
 | Dashboard Overview | Strain Analysis |
 | :---: | :---: |
-| ![Dashboard](imgs/img1.png) | ![Strain](imgs/img3.png) |
+| ![Dashboard](imgs/img1.png)|
 
-| Bull's-eye Model | Patient History |
+| Patient History |
 | :---: | :---: |
-| ![Bulls-eye](imgs/img5.png) | ![History](imgs/img2.png) |
+| ![History](imgs/img2.png) |
 
 ---
 
@@ -80,7 +80,7 @@ The easiest way to run CardioVision is using Docker Compose:
 
 3.  **Run with Docker Compose**:
     ```bash
-    cd "Web Portal"
+    cd "Web Development"
     docker-compose up --build
     ```
 
@@ -92,7 +92,7 @@ The application will be available at `http://localhost:3000`.
 
 ```text
 CardioVision/
-├── Web Portal/
+├── Web Development/
 │   ├── frontend/          # React + Vite + TS
 │   ├── backend/           # Express (Orchestration) + Flask (AI)
 │   ├── docker-compose.yml # Docker orchestration
