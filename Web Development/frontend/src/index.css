@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cardio-dark: #07090f;
+    --cardio-darker: #040508;
+    --cardio-accent: #2563eb;
+    --cardio-primary: #3b82f6;
+    --cardio-secondary: #06b6d4;
+    --cardio-danger: #ef4444;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-[#07090f] dark:text-slate-200 antialiased selection:bg-blue-500/30 font-sans overflow-hidden transition-colors duration-500;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 40%);
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl rounded-3xl transition-all duration-300;
+  }
+
+  .glass-card-hover {
+    @apply hover:bg-white/10 hover:border-white/20 hover:shadow-blue-500/10;
+  }
+
+  .neon-text-blue {
+    @apply text-blue-400 drop-shadow-md;
+    text-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  }
+
+  .neon-text-cyan {
+    @apply text-cyan-400 drop-shadow-md;
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+  }
+
+  .neon-border-blue {
+    @apply border-blue-500/50 shadow-lg shadow-blue-500/20;
+  }
+
+  .btn-premium {
+    @apply relative px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl overflow-hidden transition-all duration-300 hover:bg-blue-500 hover:scale-105 active:scale-95 shadow-lg shadow-blue-600/20 before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:via-white/20 before:to-white/0 before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700;
+  }
+
+  .sidebar-item-active {
+    @apply bg-blue-500/10 border-r-4 border-blue-500 text-blue-600 dark:text-white shadow-inner shadow-blue-500/30;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 4s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-200 dark:bg-white/5;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-white/10 rounded-full hover:bg-slate-400 dark:hover:bg-white/20 transition-colors;
+}
+
+/* Tooltip custom style */
+.tooltip-custom {
+  @apply absolute z-50 px-3 py-2 bg-slate-900/90 backdrop-blur-md border border-white/10 text-xs font-medium text-white rounded-lg shadow-xl opacity-0 scale-95 transition-all duration-200 pointer-events-none;
+}
+
+.has-tooltip:hover .tooltip-custom {
+  @apply opacity-100 scale-100;
+}
+
+/* Clinical Report Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  body {
+    background: white !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Hide navigation, headers, and UI elements */
+  aside, 
+  header, 
+  nav, 
+  button, 
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset main container for print */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  .max-w-\[1400px\] {
+    max-width: 100% !important;
+  }
+
+  /* Force glass-card to be flat for print */
+  .glass-card {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    border-radius: 8px !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Ensure text is black for readability */
+  .text-white, .dark .text-white {
+    color: #0f172a !important;
+  }
+
+  .text-slate-500, .text-slate-400 {
+    color: #64748b !important;
+  }
+
+  /* Ensure colors are preserved for metrics */
+  .text-blue-500, .text-blue-600 { color: #2563eb !important; -webkit-print-color-adjust: exact; }
+  .text-emerald-500, .text-emerald-600 { color: #10b981 !important; -webkit-print-color-adjust: exact; }
+  .text-fuchsia-500, .text-fuchsia-600 { color: #d946ef !important; -webkit-print-color-adjust: exact; }
+
+  /* Specific Layout adjustments */
+  .grid {
+    display: block !important;
+  }
+
+  .grid-cols-1, .md\:grid-cols-2, .lg\:grid-cols-3, .xl\:grid-cols-12 {
+    display: block !important;
+  }
+
+  .xl\:col-span-12, .xl\:col-span-5, .xl\:col-span-7 {
+    width: 100% !important;
+    margin-bottom: 30px !important;
+  }
+
+  /* Header for the report */
+  .print-header {
+    display: block !important;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 10px;
+  }
+
+  /* Ensure images/canvases/videos show up or are replaced */
+  video {
+    display: none !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* BullsEye and Charts */
+  canvas, svg {
+    max-width: 100% !important;
+  }
+}
+
+.print-header {
+  display: none;
+}

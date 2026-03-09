@@ -1,0 +1,15 @@
+# Large model files
+backend/models/*.pt
+backend/input/
+backend/output/
+backend/uploads/
+
+# Shared volumes from host
+cardiovision.sqlite
+node_modules/
+frontend/node_modules/
+venv/
+.env
+.git/
+dist/
+frontend/dist/

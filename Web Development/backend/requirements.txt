@@ -1,0 +1,13 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+wget
+torch
+torchvision
+tqdm
+matplotlib
+numpy
+opencv-python
+flask
+flask-cors
+pandas
+scikit-image
+moviepy
