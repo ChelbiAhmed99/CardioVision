@@ -43,7 +43,7 @@ app.use(
   })
 );
 
-// Health check route (important for Railway)
+// Health check route
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "CardioVision API running" });
 });
@@ -70,7 +70,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api", videoRoutes);
 
 // Static uploads
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 
 // Serve frontend in production
 const frontendPath = path.resolve(__dirname, "../frontend/dist");
@@ -82,12 +82,17 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Start server
-app.listen(PORT, "0.0.0.0", async () => {
+// Start server with proper port & binding
+const startServer = async () => {
   try {
-    await connectToSQLite();
-    console.log(`CardioVision server running on port ${PORT}`);
+    await connectToSQLite(); // Ensure DB connection before listening
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 CardioVision server running on port ${PORT}`);
+    });
   } catch (error) {
-    console.error("Database connection failed:", error);
+    console.error("❌ Database connection failed:", error);
+    process.exit(1); // Exit container if DB fails
   }
-});
+};
+
+startServer();
