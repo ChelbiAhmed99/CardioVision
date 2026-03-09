@@ -43,19 +43,6 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 -   **Computer Vision**: OpenCV, Scikit-image
 -   **Data Processing**: NumPy, Pandas
 
----
-
-## Screenshots
-
-| Dashboard Overview | Strain Analysis |
-| :---: | :---: |
-| ![Dashboard](imgs/img1.png)|
-
-| Patient History |
-| :---: | :---: |
-| ![History](imgs/img2.png) |
-
----
 
 ## 🚦 Getting Started
 
