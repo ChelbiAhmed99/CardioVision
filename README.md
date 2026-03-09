@@ -76,7 +76,7 @@ The easiest way to run CardioVision is using Docker Compose:
     ```
 
 2.  **Environment Setup**:
-    Create a `.env` file in the `Web Portal` directory based on `.env.example`.
+    Create a `.env` file in the `Web Development` directory based on `.env.example`.
 
 3.  **Run with Docker Compose**:
     ```bash
