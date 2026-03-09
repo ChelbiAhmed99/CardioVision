@@ -40,7 +40,7 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 -   **Data Processing**: NumPy, Pandas
 
 
-## 🚦 Getting Started
+## Getting StartedI confirm that I want to delete the project reliable-energy
 
 ### Prerequisites
 -   [Docker](https://www.docker.com/get-started)
@@ -91,14 +91,3 @@ CardioVision/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-<p align="center">
-  Developed by <b>Ahmed Chelbi</b>
-</p>
