@@ -1,10 +1,16 @@
 import User from './models/sql/user.model.js';
+import AuditLog from './models/sql/audit.model.js';
+import Settings from './models/sql/settings.model.js';
+import Video from './models/sql/videos.model.js';
+import Notification from './models/sql/notification.model.js';
+import Analysis from './models/sql/analysis.model.js';
+import Feedback from './models/sql/feedback.model.js';
 import bcrypt from 'bcryptjs';
 import sequelize from './db/db.config.js';
 
 async function reset() {
     try {
-        await sequelize.sync({ alter: true });
+        await sequelize.sync();
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash('admin123', salt);
 

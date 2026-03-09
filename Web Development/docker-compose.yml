@@ -9,8 +9,9 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=http://localhost:3000/api
-      - VITE_FLASK_API_URL=http://localhost:5000
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:5173}
+      - VITE_API_URL=${VITE_API_URL:-/api}
+      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai:5000}
     volumes:
       - ./backend/uploads:/app/uploads
       - ./cardiovision.sqlite:/app/cardiovision.sqlite

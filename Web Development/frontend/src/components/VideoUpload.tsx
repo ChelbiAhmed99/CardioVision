@@ -68,7 +68,7 @@ export function VideoUpload({
     formData.append('video', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/video', {
+      const response = await fetch('/api/ai/api/video', {
         method: 'POST',
         body: formData,
       });

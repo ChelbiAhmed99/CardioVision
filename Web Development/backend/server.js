@@ -14,6 +14,7 @@ import settingsRoutes from "./routes/settings.routes.js";
 import { connectToSQLite } from "./db/db.config.js";
 import { deserializeUser } from "./middleware/auth.middleware.js";
 import { checkMaintenanceMode } from "./middleware/settings.middleware.js";
+import proxy from "express-http-proxy";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -29,10 +30,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow requests from your React app's origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
-    credentials: true, // Include credentials if needed
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
+
+// Proxy AI requests to Flask backend
+app.use("/api/ai", proxy(process.env.FLASK_API_URL || "http://localhost:5000"));
 
 app.use(deserializeUser);
 app.use(checkMaintenanceMode);

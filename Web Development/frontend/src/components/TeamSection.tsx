@@ -1,4 +1,3 @@
-import React from 'react';
 import { Linkedin, Mail } from 'lucide-react';
 
 interface TeamMemberProps {
@@ -85,24 +84,22 @@ export function TeamSection() {
         <div className="grid grid-cols-2 gap-8">
           <TeamMember
             name="Ahmed CHELBI"
-            college="University of Tunis"
-            branch="Computer Science / AI"
-            year="Final Year"
-            interest="Artificial Intelligence in Healthcare and Deep Learning"
-            linkedIn="#"
-            email="ahmed.chelbi@example.com"
-            image="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed"
+            college="Tunisia"
+            branch="Software engineer fresh graduate"
+            interest="Passionate about AI and deep learning and healthcare"
+            linkedIn="https://www.linkedin.com/in/ahmed-chelbi/"
+            email="chelbiahmed501@gmail.com"
+            image="/team/ahmed.png"
           />
 
           <TeamMember
-            name="Manel ZAMMAR"
-            college="University of Tunis"
-            branch="Medical Engineering"
-            year="Final Year"
-            interest="Medical Imaging, Echocardiography Analysis and Bio-informatics"
-            linkedIn="#"
-            email="manel.zammar@example.com"
-            image="https://api.dicebear.com/7.x/avataaars/svg?seed=Manel"
+            name="Manal ZAMMAR"
+            college="Faculté de Médecine et de Pharmacie de Casablanca"
+            branch="Medical Student"
+            interest="Passionate About Clinical and Scientific Research"
+            linkedIn="https://www.linkedin.com/in/manal-zammar-521860388/"
+            email="zammarmanal@gmail.com"
+            image="/team/manal.png"
           />
 
         </div>
