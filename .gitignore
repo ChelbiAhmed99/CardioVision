@@ -53,3 +53,4 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 !backend/input/.gitkeep
 !backend/output/.gitkeep
+node_modules
