@@ -130,34 +130,32 @@ export const AdminDashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Dummy Graph implementation for "Impressive" visual */}
+                        {/* Real-time Growth Graph */}
                         <div className="h-48 sm:h-64 flex items-end gap-1 sm:gap-3 px-2 overflow-hidden">
-                            {[40, 65, 45, 90, 75, 85, 60, 95, 100, 80, 85, 92].map((h, i) => (
-                                <div key={i} className="flex-1 group relative h-full flex items-end">
-                                    <div
-                                        className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 rounded-lg transition-all duration-1000 ease-out delay-[i*50ms] group-hover:from-fuchsia-600 group-hover:to-blue-600"
-                                        style={{ height: `${h}%` }}
-                                    >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
-                                            {h}% Growth
+                            {(stats?.acquisitionData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).map((count: number, i: number) => {
+                                const maxCount = Math.max(...(stats?.acquisitionData || [1]));
+                                const height = maxCount > 0 ? (count / maxCount) * 100 : 5;
+                                return (
+                                    <div key={i} className="flex-1 group relative h-full flex items-end">
+                                        <div
+                                            className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 rounded-lg transition-all duration-1000 ease-out"
+                                            style={{ height: `${Math.max(height, 5)}%` }}
+                                        >
+                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                                                {count} Signups
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                         <div className="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest overflow-hidden">
-                            <span>Jan</span>
-                            <span className="hidden sm:inline">Feb</span>
-                            <span>Mar</span>
-                            <span className="hidden sm:inline">Apr</span>
-                            <span>May</span>
-                            <span className="hidden sm:inline">Jun</span>
-                            <span>Jul</span>
-                            <span className="hidden sm:inline">Aug</span>
-                            <span>Sep</span>
-                            <span className="hidden sm:inline">Oct</span>
-                            <span>Nov</span>
-                            <span>Dec</span>
+                            {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => {
+                                const now = new Date();
+                                const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+                                const label = d.toLocaleString('default', { month: 'short' });
+                                return <span key={i} className={(i % 2 === 1) ? "hidden sm:inline" : ""}>{label}</span>;
+                            })}
                         </div>
                     </div>
                 </div>
@@ -197,17 +195,22 @@ export const AdminDashboard: React.FC = () => {
                             Recent Activity
                         </h4>
                         <div className="space-y-6">
-                            {[1, 2, 3].map((_, i) => (
-                                <div key={i} className="flex gap-4 items-start">
-                                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center shrink-0">
-                                        <Users className="w-4 h-4 text-slate-500" />
+                            {stats?.recentActivity?.length > 0 ? (
+                                stats.recentActivity.map((activity: any, i: number) => (
+                                    <div key={i} className="flex gap-4 items-start">
+                                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center shrink-0">
+                                            <Activity className="w-4 h-4 text-blue-500" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate capitalize">{activity.action}</p>
+                                            <p className="text-[10px] text-slate-500 line-clamp-2">{activity.details}</p>
+                                            <p className="text-[8px] text-slate-400 mt-1 uppercase font-black">{new Date(activity.timestamp).toLocaleString()}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-slate-900 dark:text-white">New Practitioner Signup</p>
-                                        <p className="text-[10px] text-slate-500">2 minutes ago • Clinical ID #442</p>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <p className="text-[10px] text-slate-500 text-center py-4 italic">No recent activity detected</p>
+                            )}
                         </div>
                     </div>
                 </div>

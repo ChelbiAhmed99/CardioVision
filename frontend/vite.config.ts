@@ -11,15 +11,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:3000',
+        target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
       '/video-output': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_FLASK_TARGET || 'http://127.0.0.1:5000',
         changeOrigin: true,
       }
     },

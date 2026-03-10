@@ -3,6 +3,7 @@ import Waitlist from "../models/waitlist.model.js";
 import Settings from "../models/sql/settings.model.js";
 import AuditLog from "../models/sql/audit.model.js";
 import Feedback from "../models/sql/feedback.model.js";
+import { Op, fn, col } from "sequelize";
 import bcrypt from "bcryptjs";
 
 export const getAllUsers = async (req, res) => {
@@ -160,14 +161,61 @@ export const getAdminStats = async (req, res) => {
     try {
         const userCount = await User.count();
         const waitlistCount = await Waitlist.count();
-        const latestLogs = await AuditLog.count();
+
+        // Calculate monthly acquisition data for the last 12 months
+        const months = [];
+        const now = new Date();
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({
+                name: d.toLocaleString('default', { month: 'short' }),
+                year: d.getFullYear(),
+                month: d.getMonth(),
+                count: 0
+            });
+        }
+
+        const usersByMonth = await User.findAll({
+            attributes: [
+                [fn('strftime', '%m', col('createdAt')), 'month'],
+                [fn('strftime', '%Y', col('createdAt')), 'year'],
+                [fn('count', col('id')), 'count']
+            ],
+            where: {
+                createdAt: {
+                    [Op.gte]: new Date(now.getFullYear() - 1, now.getMonth(), 1)
+                }
+            },
+            group: ['month', 'year']
+        });
+
+        // Map real data to month structure
+        const acquisitionData = months.map(m => {
+            const match = usersByMonth.find(u =>
+                parseInt(u.getDataValue('month')) === (m.month + 1) &&
+                parseInt(u.getDataValue('year')) === m.year
+            );
+            return match ? parseInt(match.getDataValue('count')) : 0;
+        });
+
+        // Get recent activity from audit logs
+        const recentActivity = await AuditLog.findAll({
+            limit: 5,
+            order: [['createdAt', 'DESC']],
+            include: [] // If you had relations, you'd include them here
+        });
 
         res.status(200).json({
             totalUsers: userCount,
             totalWaitlist: waitlistCount,
-            activeSessions: Math.floor(userCount * 0.4) + 1,
+            activeSessions: userCount > 0 ? Math.max(1, Math.floor(userCount * 0.15)) : 0, // 15% heuristic
             systemHealth: "Optimal",
-            auditLogsCount: latestLogs
+            acquisitionData,
+            recentActivity: recentActivity.map(log => ({
+                action: log.action.replace(/_/g, ' '),
+                details: log.details,
+                timestamp: log.createdAt
+            }))
         });
     } catch (error) {
         console.error("Error in getAdminStats:", error);

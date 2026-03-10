@@ -732,9 +732,8 @@ def savevideo(filename: str, array: np.ndarray, fps: typing.Union[float, int] = 
                 frame_bgr = np.ascontiguousarray(frame_bgr)
             
             # Write the frame
-            success = out.write(frame_bgr)
-            if not success:
-                print(f"Warning: Failed to write frame {i}")
+            out.write(frame_bgr)
+            # cv2.VideoWriter.write() returns None in Python, so we can't check success this way
                 
     except Exception as e:
         raise RuntimeError(f"Error while saving video: {str(e)}")

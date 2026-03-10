@@ -1,20 +1,34 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://express-backend:3000
+      - VITE_PROXY_TARGET=http://express-backend:3000
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    depends_on:
+      - express-backend
+
   express-backend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     environment:
-      - NODE_ENV=production
-      - CLIENT_URL=${CLIENT_URL:-http://localhost:5173}
-      - VITE_API_URL=${VITE_API_URL:-/api}
-      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai:5000}
+      - NODE_ENV=development
+      - PORT=3000
+      - FLASK_API_URL=http://flask-ai:5000
+      - JWT_SECRET=dev-secret-stable-123
     volumes:
-      - ./backend/uploads:/app/uploads
-      - ./cardiovision.sqlite:/app/cardiovision.sqlite
+      - .:/app
+      - /app/node_modules
+      - /app/frontend/node_modules
     depends_on:
       - flask-ai
 
@@ -24,7 +38,10 @@ services:
       dockerfile: Dockerfile.flask
     ports:
       - "5000:5000"
+    environment:
+      - FLASK_ENV=development
     volumes:
+      - ./backend:/app
       - ./backend/input:/app/input
       - ./backend/output:/app/output
       - ./backend/models:/app/models

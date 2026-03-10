@@ -63,7 +63,7 @@ app.get("/health", (req, res) => {
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  proxy(process.env.FLASK_API_URL || "http://localhost:5000", {
+  proxy(process.env.FLASK_API_URL || "http://127.0.0.1:5000", {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
   })
 );
