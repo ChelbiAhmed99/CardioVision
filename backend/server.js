@@ -43,6 +43,9 @@ const app = express();
 // Railway dynamic port
 const PORT = process.env.PORT || 3000;
 
+console.log(`📡 Environment: ${process.env.NODE_ENV}`);
+console.log(`🔗 Target FLASK_API_URL: ${process.env.FLASK_API_URL || "Using fallback http://127.0.0.1:5000"}`);
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -65,6 +68,16 @@ app.use(
   "/api/ai",
   proxy(process.env.FLASK_API_URL || "http://127.0.0.1:5000", {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
+    proxyErrorHandler: (err, res, next) => {
+      console.error(`❌ Proxy Error to Flask: ${err.code} - ${err.message}`);
+      console.error(`Failed to reach: ${process.env.FLASK_API_URL}${req.originalUrl.replace("/api/ai", "")}`);
+      res.status(502).json({
+        error: "AI Backend unreachable",
+        details: err.code,
+        target: process.env.FLASK_API_URL
+      });
+    },
+    timeout: 30000, // 30s timeout
   })
 );
 

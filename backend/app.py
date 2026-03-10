@@ -1024,8 +1024,10 @@ def get_video_ecg():
 
 
 if __name__ == "__main__":
+    # In Railway, the PORT variable is assigned by the platform
     port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Starting Flask AI backend on port {port}...")
-    app.run(host="0.0.0.0", port=port)
+    print(f"🚀 CardioVision AI backend starting...")
+    print(f"📡 Binding to 0.0.0.0:{port}")
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 
