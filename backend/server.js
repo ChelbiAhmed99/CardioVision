@@ -13,6 +13,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 
 import { connectToSQLite } from "./db/db.config.js";
+import { initAdmin } from "./utils/initAdmin.js";
 import { deserializeUser } from "./middleware/auth.middleware.js";
 import { checkMaintenanceMode } from "./middleware/settings.middleware.js";
 
@@ -97,6 +98,7 @@ app.get("*", (req, res) => {
 const startServer = async () => {
   try {
     await connectToSQLite(); // Ensure DB connection before listening
+    await initAdmin(); // Auto-initialize admin account
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 CardioVision server running on port ${PORT}`);
     });
