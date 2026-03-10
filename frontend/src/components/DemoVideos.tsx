@@ -8,14 +8,12 @@ interface DemoVideoProps {
   videoUrl: string;
   thumbnailUrl: string;
   onSelect: (url: string) => void;
-  handleSubmit: any;
 }
 
-function DemoVideo({ title, description, videoUrl, thumbnailUrl, onSelect, handleSubmit }: DemoVideoProps) {
+function DemoVideo({ title, description, videoUrl, thumbnailUrl, onSelect }: DemoVideoProps) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onSelect(videoUrl);
-    handleSubmit();
   };
 
   return (
@@ -57,10 +55,9 @@ function DemoVideo({ title, description, videoUrl, thumbnailUrl, onSelect, handl
 
 interface DemoVideosProps {
   onVideoSelect: (url: string) => void;
-  handleSubmit: any;
 }
 
-export function DemoVideos({ onVideoSelect, handleSubmit }: DemoVideosProps) {
+export function DemoVideos({ onVideoSelect }: DemoVideosProps) {
   const demos = [
     {
       id: 1,
@@ -99,7 +96,6 @@ export function DemoVideos({ onVideoSelect, handleSubmit }: DemoVideosProps) {
           key={index}
           {...demo}
           onSelect={onVideoSelect}
-          handleSubmit={handleSubmit}
         />
       ))}
     </div>

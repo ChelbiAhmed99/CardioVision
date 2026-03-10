@@ -653,6 +653,7 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
+from download_models import download_models
 
 def loadvideo(filename: str) -> np.ndarray:
     if not os.path.exists(filename):
@@ -1109,17 +1110,22 @@ frames = 32
 period = 1 #2
 batch_size = 20
 def get_pretrained_model():
+    # Ensure models are present
+    download_models()
+    
     ef_model = torchvision.models.video.r2plus1d_18(pretrained=False)
     ef_model.fc = torch.nn.Linear(ef_model.fc.in_features, 1)
     device = torch.device("cpu")
-    checkpoint = torch.load('models/r2plus1d_18_32_2_pretrained.pt', map_location="cpu", weights_only=False)
+    ef_model_path = os.path.join(os.path.dirname(__file__), 'https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt')
+    checkpoint = torch.load(ef_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     ef_model.load_state_dict(state_dict_cpu)
 
     seg_model = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=False)
     seg_model.classifier[-1] = torch.nn.Conv2d(seg_model.classifier[-1].in_channels, 1, kernel_size=seg_model.classifier[-1].kernel_size)
 
-    checkpoint = torch.load('models/deeplabv3_resnet50_random.pt', map_location="cpu", weights_only=False)
+    seg_model_path = os.path.join(os.path.dirname(__file__), 'https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt')
+    checkpoint = torch.load(seg_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     seg_model.load_state_dict(state_dict_cpu)
     return seg_model, ef_model

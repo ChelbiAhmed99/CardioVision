@@ -94,7 +94,10 @@ function HomeContent() {
     const interval = setInterval(() => {
       progress += 20;
       setUploadProgress(Math.min(progress, 100));
-      if (progress >= 100) clearInterval(interval);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setIsUploadReady(true);
+      }
     }, 150);
   };
 
@@ -203,7 +206,7 @@ function HomeContent() {
                     <Shield className="w-5 h-5 text-emerald-400" />
                     Demo Case Studies
                   </h3>
-                  <DemoVideos handleSubmit={handleSubmit} onVideoSelect={handleDemoSelect} />
+                  <DemoVideos onVideoSelect={handleDemoSelect} />
                 </div>
               )}
 
