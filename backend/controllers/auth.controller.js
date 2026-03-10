@@ -4,7 +4,8 @@ import Settings from "../models/sql/settings.model.js";
 import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
-    const { fullName, email, password } = req.body;
+    let { fullName, email, password } = req.body;
+    if (email) email = email.trim().toLowerCase();
     try {
         const settings = await Settings.findOne({ order: [['createdAt', 'DESC']] });
         if (settings && settings.allowSignups === false) {
@@ -53,7 +54,8 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    if (email) email = email.trim().toLowerCase();
     try {
         const user = await User.findOne({ where: { email } });
 
