@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+frontend/dist/
+
+# Env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Models (too large for GitHub)
+backend/models/*.pt
+backend/models/*.pth
+models/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Editor/System
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary
+tmp/
+temp/
+backend/input/*
+backend/output/*
+backend/uploads/*
+!backend/uploads/.gitkeep
+!backend/input/.gitkeep
+!backend/output/.gitkeep
