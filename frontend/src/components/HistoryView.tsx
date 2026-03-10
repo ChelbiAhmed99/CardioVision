@@ -110,56 +110,56 @@ export function HistoryView({ onCompare }: HistoryViewProps) {
 
             <div className="grid gap-4">
                 {filteredHistory.length === 0 ? (
-                    <div className="glass-card p-20 text-center border-dashed border-2 border-slate-200 dark:border-white/5">
+                    <div className="glass-card p-12 sm:p-20 text-center border-dashed border-2 border-slate-200 dark:border-white/5">
                         <FileText className="w-12 h-12 text-slate-300 dark:text-white/10 mx-auto mb-4" />
-                        <p className="text-slate-500 font-medium">No clinical records found matches your search.</p>
+                        <p className="text-slate-500 font-medium font-display">No clinical records found matches your search.</p>
                     </div>
                 ) : (
                     filteredHistory.map((record) => (
                         <div
                             key={record._id}
                             onClick={() => handleSelect(record)}
-                            className={`glass-card p-6 transition-all group cursor-pointer border-2 ${selectedRecords.find(r => r._id === record._id) ? 'border-blue-500 bg-blue-600/5' : 'border-slate-200 dark:border-white/5 hover:border-blue-500/30'}`}
+                            className={`glass-card p-4 sm:p-6 transition-all group cursor-pointer border-2 ${selectedRecords.find(r => r._id === record._id) ? 'border-blue-500 bg-blue-600/5' : 'border-slate-200 dark:border-white/5 hover:border-blue-500/30'}`}
                         >
-                            <div className="flex flex-wrap items-center gap-8">
-                                <div className="flex items-center gap-4 min-w-[200px]">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${selectedRecords.find(r => r._id === record._id) ? 'text-blue-500' : 'text-slate-300 dark:text-white/10 group-hover:text-blue-500'}`}>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+                                <div className="flex items-center gap-4 min-w-0 sm:min-w-[200px]">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors shrink-0 ${selectedRecords.find(r => r._id === record._id) ? 'text-blue-500' : 'text-slate-300 dark:text-white/10 group-hover:text-blue-500'}`}>
                                         {selectedRecords.find(r => r._id === record._id) ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
                                     </div>
-                                    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/10 group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-colors">
-                                        <User className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/10 group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-colors shrink-0">
+                                        <User className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 group-hover:text-blue-500" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Patient Identity</p>
-                                        <p className="text-sm font-bold text-slate-900 dark:text-white">{record.patientId || 'Anonymous_ID'}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">Patient Identity</p>
+                                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{record.patientId || 'Anonymous_ID'}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-8 flex-1">
+                                <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8 flex-1 border-t border-b sm:border-none border-slate-100 dark:border-white/5 py-3 sm:py-0">
                                     <div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ejection Fraction</p>
-                                        <p className="text-lg font-display font-black text-emerald-500">{record.metrics?.ejectionFraction || record.metrics?.simpsonEF || '--'}%</p>
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">EF</p>
+                                        <p className="text-base sm:text-lg font-display font-black text-emerald-500">{record.metrics?.ejectionFraction || record.metrics?.simpsonEF || '--'}%</p>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">GLS Analysis</p>
-                                        <p className="text-lg font-display font-black text-blue-500">{record.metrics?.gls || '--'}%</p>
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">GLS</p>
+                                        <p className="text-base sm:text-lg font-display font-black text-blue-500">{record.metrics?.gls || '--'}%</p>
                                     </div>
                                     <div className="hidden xl:block">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Primary Diagnosis</p>
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Primary Diagnosis</p>
                                         <p className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[200px]">{record.diagnosis?.problem || 'Not Specified'}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-6">
-                                    <div className="text-right">
-                                        <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase">
+                                <div className="flex items-center justify-between sm:justify-end gap-6">
+                                    <div className="text-left sm:text-right">
+                                        <div className="flex items-center sm:justify-end gap-2 text-slate-500 text-[9px] font-bold uppercase">
                                             <Calendar className="w-3 h-3" />
                                             {new Date(record.createdAt).toLocaleDateString()}
                                         </div>
-                                        <p className="text-[10px] text-slate-400 mt-1">{new Date(record.createdAt).toLocaleTimeString()}</p>
+                                        <p className="text-[9px] text-slate-400 mt-0.5">{new Date(record.createdAt).toLocaleTimeString()}</p>
                                     </div>
-                                    <button className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/10 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all">
-                                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                                    <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/10 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all shrink-0">
+                                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-white" />
                                     </button>
                                 </div>
                             </div>

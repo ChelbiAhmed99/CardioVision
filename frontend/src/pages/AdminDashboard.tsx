@@ -82,7 +82,7 @@ export const AdminDashboard: React.FC = () => {
                         <ShieldCheck className="w-3.5 h-3.5" />
                         Executive Control Center
                     </div>
-                    <h2 className="text-5xl font-display font-black text-slate-900 dark:text-white tracking-tighter">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-slate-900 dark:text-white tracking-tighter">
                         Admin <span className="text-blue-600">Intelligence</span>
                     </h2>
                 </div>
@@ -96,19 +96,16 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {cards.map((card, i) => (
-                    <div key={i} className="glass-card p-6 group hover:scale-[1.02] transition-all duration-500 border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5">
+                    <div key={i} className="glass-card p-4 sm:p-6 group hover:scale-[1.02] transition-all duration-500 border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5">
                         <div className="flex items-start justify-between mb-4">
-                            <div className={`p-3 rounded-2xl ${card.bg} ${card.color}`}>
-                                <card.icon className="w-6 h-6" />
+                            <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${card.bg} ${card.color}`}>
+                                <card.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
-                            <button className="text-slate-400 hover:text-blue-500 transition-colors">
-                                <ArrowUpRight className="w-4 h-4" />
-                            </button>
                         </div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{card.label}</p>
-                        <h3 className="text-3xl font-display font-black text-slate-900 dark:text-white">{card.value}</h3>
+                        <p className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 truncate">{card.label}</p>
+                        <h3 className="text-xl sm:text-3xl font-display font-black text-slate-900 dark:text-white">{card.value}</h3>
                     </div>
                 ))}
             </div>
@@ -134,31 +131,31 @@ export const AdminDashboard: React.FC = () => {
                         </div>
 
                         {/* Dummy Graph implementation for "Impressive" visual */}
-                        <div className="h-48 sm:h-64 flex items-end gap-1.5 sm:gap-3 px-2">
+                        <div className="h-48 sm:h-64 flex items-end gap-1 sm:gap-3 px-2 overflow-hidden">
                             {[40, 65, 45, 90, 75, 85, 60, 95, 100, 80, 85, 92].map((h, i) => (
-                                <div key={i} className="flex-1 group relative">
+                                <div key={i} className="flex-1 group relative h-full flex items-end">
                                     <div
                                         className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 rounded-lg transition-all duration-1000 ease-out delay-[i*50ms] group-hover:from-fuchsia-600 group-hover:to-blue-600"
                                         style={{ height: `${h}%` }}
                                     >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                                            {h}% Efficiency
+                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                                            {h}% Growth
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <div className="flex justify-between mt-6 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <div className="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest overflow-hidden">
                             <span>Jan</span>
-                            <span>Feb</span>
+                            <span className="hidden sm:inline">Feb</span>
                             <span>Mar</span>
-                            <span>Apr</span>
+                            <span className="hidden sm:inline">Apr</span>
                             <span>May</span>
-                            <span>Jun</span>
+                            <span className="hidden sm:inline">Jun</span>
                             <span>Jul</span>
-                            <span>Aug</span>
+                            <span className="hidden sm:inline">Aug</span>
                             <span>Sep</span>
-                            <span>Oct</span>
+                            <span className="hidden sm:inline">Oct</span>
                             <span>Nov</span>
                             <span>Dec</span>
                         </div>

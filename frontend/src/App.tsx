@@ -230,8 +230,16 @@ function HomeContent() {
         <div className="absolute top-[30%] right-[10%] w-[30%] h-[30%] bg-fuchsia-600/5 rounded-full blur-[100px]"></div>
       </div>
 
+      {/* Sidebar Overlay for Mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`fixed lg:relative inset-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 w-72 bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 ease-in-out z-40 shadow-2xl`}>
+      <aside className={`fixed lg:relative inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 w-72 bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 ease-in-out z-50 shadow-2xl`}>
         <div className="flex flex-col h-full">
           <div className="p-8">
             <div className="flex items-center gap-4 mb-10 group cursor-pointer">
@@ -317,12 +325,12 @@ function HomeContent() {
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-3 hover:bg-white/5 rounded-2xl transition-colors border border-white/5">
               <Menu className="w-6 h-6 text-slate-400" />
             </button>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-blue-500/80 mb-1">
-                <Shield className="w-3.5 h-3.5" />
-                Encrypted Session
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2 text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-blue-500/80 mb-1 truncate">
+                <Shield className="w-3 s:w-3.5 h-3 s:h-3.5 shrink-0" />
+                <span className="truncate">Encrypted Session</span>
               </div>
-              <p className="text-lg font-display font-bold text-slate-900 dark:text-white tracking-tight">Diagnostic Workflow</p>
+              <p className="text-base sm:text-lg font-display font-bold text-slate-900 dark:text-white tracking-tight truncate">Diagnostic Workflow</p>
             </div>
           </div>
 
@@ -343,11 +351,11 @@ function HomeContent() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 bg-white/5 rounded-2xl pl-2.5 pr-5 py-2 border border-white/10 hover:border-white/20 transition-all cursor-pointer group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-600 flex items-center justify-center text-xs font-black text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+            <div className="flex items-center gap-3 sm:gap-4 bg-white/5 rounded-2xl pl-1 sm:pl-2.5 pr-2 sm:pr-5 py-1.5 sm:py-2 border border-white/10 hover:border-white/20 transition-all cursor-pointer group shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-tr from-blue-600 to-blue-500 flex items-center justify-center text-[10px] sm:text-xs font-black text-white shadow-lg group-hover:scale-105 transition-transform duration-300 shrink-0">
                 {authUser?.fullName?.substring(0, 2).toUpperCase() || 'MD'}
               </div>
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden lg:block">
                 <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{authUser?.fullName || 'Dr. Guest'}</p>
                 <p className="text-[10px] text-slate-500 font-bold">Authenticated Professional</p>
               </div>
@@ -355,7 +363,7 @@ function HomeContent() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar relative px-10 py-10">
+        <main className="flex-1 overflow-y-auto custom-scrollbar relative px-4 sm:px-10 py-6 sm:py-10">
           <div className="max-w-[1400px] mx-auto">
             {renderContent()}
           </div>

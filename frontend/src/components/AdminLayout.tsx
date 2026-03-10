@@ -55,7 +55,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <aside className={`
                 ${isCollapsed ? 'w-24' : 'w-72'} 
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                fixed lg:relative h-full bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 flex flex-col z-50 px-4 py-8 shadow-2xl dark:shadow-none
+                fixed lg:relative inset-y-0 left-0 h-full bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 flex flex-col z-50 px-4 py-8 shadow-2xl dark:shadow-none
             `}>
                 <div className="flex items-center gap-4 px-4 mb-20">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">

@@ -114,11 +114,11 @@ export const LandingPage: React.FC = () => {
           <Zap className="w-3.5 h-3.5 fill-current" />
           {settings.announcementText}
         </div>
-        <h2 className="text-4xl sm:text-6xl md:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tighter mb-8 leading-[0.9] animate-slide-up">
+        <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tighter mb-8 leading-[0.9] animate-slide-up">
           {settings.heroTitle} <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">{settings.heroHighlight}</span>
         </h2>
-        <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 animate-slide-up delay-100 px-4">
+        <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 animate-slide-up delay-100 px-4">
           {settings.heroSubtitle}
         </p>
 
@@ -135,7 +135,7 @@ export const LandingPage: React.FC = () => {
             />
             <button
               disabled={loading}
-              className="mt-4 sm:mt-0 sm:absolute sm:right-2 sm:top-2 sm:bottom-2 h-12 sm:h-auto px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 sm:mt-0 sm:absolute sm:right-2 sm:top-2 sm:bottom-2 h-14 sm:h-auto px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/30"
             >
               {loading ? "Joining..." : "Get Access"}
               <ArrowRight className="w-4 h-4" />
@@ -150,7 +150,7 @@ export const LandingPage: React.FC = () => {
 
       {/* Features Grid */}
       <section className="relative z-10 px-6 py-32 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               title: "Clinical Accuracy",
@@ -180,11 +180,11 @@ export const LandingPage: React.FC = () => {
       {/* Trust Section */}
       <section className="relative z-10 px-6 py-24 max-w-7xl mx-auto text-center">
         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-12">Trusted by clinicians at</h4>
-        <div className="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
-          <div className="text-2xl font-black italic">HOSPITAL_A</div>
-          <div className="text-2xl font-black italic">MED_TECH_INST</div>
-          <div className="text-2xl font-black italic">CARDIOLOGY_CLINIC</div>
-          <div className="text-2xl font-black italic">VET_PRACTICE</div>
+        <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
+          <div className="text-xl sm:text-2xl font-display font-black tracking-tighter">MAYO <span className="text-blue-500">CLINIC</span></div>
+          <div className="text-xl sm:text-2xl font-display font-black tracking-tighter">CLEVELAND <span className="text-blue-500">CLINIC</span></div>
+          <div className="text-xl sm:text-2xl font-display font-black tracking-tighter">STANFORD <span className="text-blue-500">MED</span></div>
+          <div className="text-xl sm:text-2xl font-display font-black tracking-tighter">ST. <span className="text-blue-500">JUDE</span></div>
         </div>
       </section>
 

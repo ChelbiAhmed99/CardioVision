@@ -118,7 +118,7 @@ export function BullsEye({ data }: BullsEyeProps) {
         <div className="relative flex flex-col items-center glass-card p-6 sm:p-10 group overflow-hidden border-white/5">
             <div className="absolute inset-0 bg-blue-600/5 blur-[80px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-            <svg viewBox="0 0 200 200" className="w-48 h-48 sm:w-60 sm:h-60 drop-shadow-2xl overflow-visible">
+            <svg viewBox="0 0 200 200" className="w-full max-w-[240px] aspect-square drop-shadow-2xl overflow-visible">
                 {segments}
                 <text x="100" y="8" textAnchor="middle" fill="white" fontSize="7" className="font-bold opacity-30 tracking-widest uppercase">Anterior</text>
                 <text x="100" y="196" textAnchor="middle" fill="white" fontSize="7" className="font-bold opacity-30 tracking-widest uppercase">Inferior</text>
