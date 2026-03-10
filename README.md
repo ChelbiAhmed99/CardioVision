@@ -54,16 +54,15 @@ The easiest way to run CardioVision is using Docker Compose:
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/ChelbiAhmed99/CardioVision.
+    git clone https://github.com/ChelbiAhmed99/CardioVision
     cd CardioVision
     ```
 
 2.  **Environment Setup**:
-    Create a `.env` file in the `Web Development` directory based on `.env.example`.
+    Create a `.env` file in the root directory based on `.env.example`.
 
 3.  **Run with Docker Compose**:
     ```bash
-    cd "Web Development"
     docker-compose up --build
     ```
 
@@ -75,14 +74,15 @@ The application will be available at `http://localhost:3000`.
 
 ```text
 CardioVision/
-├── Web Development/
-│   ├── frontend/          # React + Vite + TS
-│   ├── backend/           # Express (Orchestration) + Flask (AI)
-│   ├── docker-compose.yml # Docker orchestration
-│   └── Dockerfile         # Frontend/Express Dockerfile
-├── Model Training/        # Scripts for model development
+├── backend/               # Orchestration API (Express) & AI Service (Flask)
+├── frontend/              # Web Dashboard (React + Vite + TS)
+├── Model Training and Development/ # Scripts for model research & fine-tuning
 ├── growth_resources/      # Waitlist & marketing assets
-└── imgs/                  # Project media and screenshots
+├── imgs/                  # Project media and screenshots
+├── Dockerfile             # Multi-stage Dockerfile for Frontend & Express
+├── Dockerfile.flask       # Dockerfile for Flask AI Service
+├── docker-compose.yml     # Docker orchestration for all services
+└── cardiovision.sqlite    # Local SQLite database
 ```
 
 ---

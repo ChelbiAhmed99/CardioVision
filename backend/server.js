@@ -26,6 +26,17 @@ const __dirname = path.dirname(__filename);
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
+// Validate JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    console.error("❌ CRITICAL: JWT_SECRET environment variable is missing in production!");
+    process.exit(1);
+  } else {
+    console.warn("⚠️ WARNING: JWT_SECRET is missing. Using a fallback for development ONLY.");
+    process.env.JWT_SECRET = "dev-secret-do-not-use-in-production";
+  }
+}
+
 const app = express();
 
 // Railway dynamic port
