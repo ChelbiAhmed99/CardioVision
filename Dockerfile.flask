@@ -20,4 +20,5 @@ COPY backend/ ./
 EXPOSE 5000
 
 # Start the Flask app
+RUN python download_models.py
 CMD ["python", "app.py"]

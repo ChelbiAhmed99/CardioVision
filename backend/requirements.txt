@@ -11,3 +11,5 @@ flask-cors
 pandas
 scikit-image
 moviepy
+requests
+requests
