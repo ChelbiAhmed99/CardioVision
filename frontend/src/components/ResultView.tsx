@@ -125,7 +125,7 @@ export function ResultView({
       const fetchResources = async () => {
         try {
           // Fetch mask GIF
-          const maskResponse = await fetch(`http://127.0.0.1:5000/get-video/mask`);
+          const maskResponse = await fetch(`/api/ai/get-video/mask`);
           if (!maskResponse.ok) {
             throw new Error('Failed to fetch mask GIF');
           }
@@ -134,7 +134,7 @@ export function ResultView({
           setMaskGif(maskUrl);
 
           // Fetch ECG GIF
-          const ecgResponse = await fetch(`http://127.0.0.1:5000/get-video/ecg`);
+          const ecgResponse = await fetch(`/api/ai/get-video/ecg`);
           if (!ecgResponse.ok) {
             throw new Error('Failed to fetch ECG GIF');
           }

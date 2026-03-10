@@ -906,8 +906,8 @@ import os
 from flask_cors import CORS
 
 app = Flask(__name__)
-# CORS(app) 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+# Enable CORS for all routes - safe since this is proxied by the Node.js backend
+CORS(app) 
 # Set up the static folders for input and output
 INPUT_FOLDER = 'input'
 OUTPUT_FOLDER = 'output'
@@ -980,10 +980,13 @@ def get_video_mask():
 
 @app.route('/api/video', methods=['POST'])
 def upload_video():
+    print(f"📥 Received upload request. Files: {request.files}")
     if 'video' not in request.files:
+        print("❌ Error: 'video' key missing in request.files")
         return jsonify({"error": "No video file provided"}), 400
     file = request.files['video']
     if file.filename == '':
+        print("❌ Error: Empty filename")
         return jsonify({"error": "No selected file"}), 400
     if file:
         # Clear intake folder to ensure only the NEW video exists
