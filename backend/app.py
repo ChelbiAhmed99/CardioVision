@@ -1024,10 +1024,11 @@ def get_video_ecg():
 
 
 if __name__ == "__main__":
-    # In Railway, the PORT variable is assigned by the platform
-    port = int(os.environ.get("PORT", 5000))
+    # In Railway, the PORT variable is assigned by the platform (usually 8080)
+    port = int(os.environ.get("PORT", 8080))
     print(f"🚀 CardioVision AI backend starting...")
-    print(f"📡 Binding to 0.0.0.0:{port}")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    print(f"📡 Binding to [::]:{port} (Supports IPv4 and IPv6)")
+    # Using host='::' allows the app to listen on all IPv6 and IPv4 interfaces
+    app.run(host="::", port=port, debug=False)
 
 

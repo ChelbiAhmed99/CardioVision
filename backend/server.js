@@ -70,7 +70,6 @@ app.use(
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
     proxyErrorHandler: (err, res, next) => {
       console.error(`❌ Proxy Error to Flask: ${err.code} - ${err.message}`);
-      console.error(`Failed to reach: ${process.env.FLASK_API_URL}${req.originalUrl.replace("/api/ai", "")}`);
       res.status(502).json({
         error: "AI Backend unreachable",
         details: err.code,
