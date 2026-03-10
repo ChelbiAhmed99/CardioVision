@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
-import { Activity, Shield, ArrowRight, Zap, Users } from 'lucide-react';
+import { Activity, Shield, ArrowRight, Zap, Users, Menu, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 export const LandingPage: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState<any>({
+    siteName: 'CardioVision',
+    heroTitle: 'GLS Analysis',
+    heroHighlight: 'In Seconds.',
+    heroSubtitle: 'The first clinical-grade AI platform for automated myocardial segmentation and quantitative biomechanical assessment. Designed for the modern cardiologist.',
+    announcementText: 'Next-Gen Echocardiography AI',
+    contactEmail: 'contact@cardiovision.com',
+    footerText: '© 2026 CardioVision AI. All rights reserved.',
+  });
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('/api/admin/public-settings');
+        if (response.data) setSettings(response.data);
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +65,7 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-8 flex items-center justify-between max-w-7xl mx-auto">
+      <nav className="relative z-50 px-6 py-8 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-3 group cursor-pointer">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-lg shadow-blue-600/20 flex items-center justify-center transform transition-transform group-hover:rotate-12 duration-500">
             <Activity className="w-6 h-6 text-white" />
@@ -52,42 +74,70 @@ export const LandingPage: React.FC = () => {
             Cardio<span className="text-blue-500">Vision</span>
           </h1>
         </div>
-        <button className="hidden md:flex items-center gap-2 px-6 py-2.5 glass-card dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:scale-105 transition-all">
-          <Shield className="w-4 h-4 text-emerald-400" />
-          Beta Access
+
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-8">
+          <a href="#features" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors">Solution</a>
+          <a href="#clinical" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors">Clinical Grade</a>
+          <button className="flex items-center gap-2 px-6 py-2.5 glass-card dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:scale-105 transition-all">
+            <Shield className="w-4 h-4 text-emerald-400" />
+            Beta Access
+          </button>
+        </div>
+
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+        >
+          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-white dark:bg-[#07090f] md:hidden animate-fade-in flex flex-col p-8 pt-32">
+          <div className="space-y-8 flex flex-col items-center">
+            <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white italic">Solution</a>
+            <a href="#clinical" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white italic">Clinical Grade</a>
+            <button className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-blue-600/20">
+              <Shield className="w-5 h-5" />
+              Request Beta Access
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-32 max-w-7xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-xs font-black uppercase tracking-widest mb-8 animate-fade-in">
           <Zap className="w-3.5 h-3.5 fill-current" />
-          Next-Gen Echocardiography AI
+          {settings.announcementText}
         </div>
-        <h2 className="text-6xl md:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tighter mb-8 leading-[0.9] animate-slide-up">
-          GLS Analysis <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">In Seconds.</span>
+        <h2 className="text-4xl sm:text-6xl md:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tighter mb-8 leading-[0.9] animate-slide-up">
+          {settings.heroTitle} <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">{settings.heroHighlight}</span>
         </h2>
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 animate-slide-up delay-100">
-          The first clinical-grade AI platform for automated myocardial segmentation and quantitative biomechanical assessment. Designed for the modern cardiologist.
+        <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 animate-slide-up delay-100 px-4">
+          {settings.heroSubtitle}
         </p>
 
         {/* Waitlist Form */}
-        <div className="max-w-md mx-auto relative animate-slide-up delay-200">
-          <form onSubmit={handleSubmit} className="relative group">
+        <div className="max-w-md mx-auto relative animate-slide-up delay-200 px-4">
+          <form onSubmit={handleSubmit} className="relative group flex flex-col sm:block">
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your clinical email..."
-              className="w-full h-16 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 pr-40 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-xl shadow-slate-200/50 dark:shadow-none"
+              className="w-full h-16 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 sm:pr-40 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-xl shadow-slate-200/50 dark:shadow-none"
             />
             <button
               disabled={loading}
-              className="absolute right-2 top-2 bottom-2 px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 sm:mt-0 sm:absolute sm:right-2 sm:top-2 sm:bottom-2 h-12 sm:h-auto px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Joining..." : "Get Early Access"}
+              {loading ? "Joining..." : "Get Access"}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -139,16 +189,16 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-12 border-t border-slate-200 dark:border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:row items-center justify-between gap-8">
+      <footer className="relative z-10 px-6 py-12 border-t border-slate-200 dark:border-white/5 bg-white dark:bg-[#07090f]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
             <Activity className="w-5 h-5 text-blue-500" />
-            <span className="text-sm font-bold">© 2026 CardioVision AI. All rights reserved.</span>
+            <span className="text-sm font-bold text-slate-600 dark:text-white">{settings.footerText}</span>
           </div>
-          <div className="flex items-center gap-8">
-            <a href="#" className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Terms of Service</a>
-            <a href="#" className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Contact</a>
+          <div className="flex items-center gap-4 sm:gap-8">
+            <a href="#" className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Privacy</a>
+            <a href="#" className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Terms</a>
+            <a href={`mailto:${settings.contactEmail}`} className="text-xs font-bold text-slate-500 hover:text-blue-500 transition-colors">Contact</a>
           </div>
         </div>
       </footer>

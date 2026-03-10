@@ -1,4 +1,5 @@
 import Notification from "../models/sql/notification.model.js";
+import User from "../models/sql/user.model.js";
 
 export const getNotifications = async (req, res) => {
     try {
@@ -40,6 +41,26 @@ export const markAllRead = async (req, res) => {
         res.status(200).json({ message: "All notifications marked as read" });
     } catch (error) {
         console.log("Error in markAllRead controller: ", error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const broadcastNotification = async (req, res) => {
+    try {
+        const { message, type } = req.body;
+        const users = await User.findAll({ attributes: ['id'] });
+
+        const notifications = users.map(user => ({
+            userId: user.id,
+            type: type || 'info',
+            message: message,
+            read: false
+        }));
+
+        await Notification.bulkCreate(notifications);
+        res.status(200).json({ message: `Broadcast sent to ${users.length} users` });
+    } catch (error) {
+        console.log("Error in broadcastNotification controller: ", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };

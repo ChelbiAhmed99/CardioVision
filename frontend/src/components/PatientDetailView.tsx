@@ -9,8 +9,11 @@ import {
     TrendingUp,
     ChevronRight,
     ShieldCheck,
-    AlertCircle
+    AlertCircle,
+    Download
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface PatientDetailViewProps {
     patientId: string;
@@ -46,6 +49,69 @@ export function PatientDetailView({ patientId, onBack, onSelectRecord }: Patient
             lastSeen: patientRecords[0].createdAt
         };
     }, [patientRecords]);
+
+    const generateBilan = () => {
+        const doc = new jsPDF();
+        const timestamp = new Date().toLocaleString();
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(37, 99, 235); // blue-600
+        doc.text("CardioVision Clinical Assessment", 105, 20, { align: "center" });
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${timestamp}`, 105, 28, { align: "center" });
+
+        // Patient Info
+        doc.setDrawColor(226, 232, 240);
+        doc.line(20, 35, 190, 35);
+
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.setFont("helvetica", "bold");
+        doc.text("Patient Identification:", 20, 45);
+        doc.setFont("helvetica", "normal");
+        doc.text(`ID: ${patientId}`, 70, 45);
+
+        // Summary Stats
+        if (stats) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Summary Clinical Metrics:", 20, 55);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Total Analyses: ${stats.totalAnalyses}`, 20, 63);
+            doc.text(`Average LVEF: ${stats.avgEf}%`, 20, 71);
+            doc.text(`Latest LVEF: ${stats.latestEf}%`, 20, 79);
+            doc.text(`Last Follow-up: ${new Date(stats.lastSeen).toLocaleDateString()}`, 20, 87);
+        }
+
+        // Table of Records
+        const tableData = patientRecords.map((r, i) => [
+            `Rev. ${patientRecords.length - i}`,
+            new Date(r.createdAt).toLocaleDateString(),
+            `${r.metrics?.ejectionFraction || r.metrics?.simpsonEF || '--'}%`,
+            `${r.metrics?.gls || '--'}%`,
+            r.diagnosis?.problem || 'Unspecified'
+        ]);
+
+        autoTable(doc, {
+            startY: 95,
+            head: [['Revision', 'Date', 'LVEF', 'GLS', 'Primary Diagnosis']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillStyle: 'fill', fillColor: [37, 99, 235], textColor: [255, 255, 255] },
+            alternateRowStyles: { fillColor: [248, 250, 252] }
+        });
+
+        // Disclaimer
+        const finalY = (doc as any).lastAutoTable.finalY + 20;
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text("CONFIDENTIAL CLINICAL DOCUMENT", 105, finalY, { align: "center" });
+        doc.text("Analysis based on 2025 Speckle Tracking Consensus - Validated AI Intelligence", 105, finalY + 5, { align: "center" });
+
+        doc.save(`Patient_Bilan_${patientId}.pdf`);
+    };
 
     if (patientRecords.length === 0) {
         return (
@@ -86,6 +152,13 @@ export function PatientDetailView({ patientId, onBack, onSelectRecord }: Patient
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={generateBilan}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        Export Patient Bilan
+                    </button>
                     <div className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">
                         Active File
                     </div>

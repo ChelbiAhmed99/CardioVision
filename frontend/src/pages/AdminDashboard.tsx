@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
     Users,
     TrendingUp,
@@ -8,21 +9,62 @@ import {
     Activity,
     ArrowUpRight
 } from 'lucide-react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 export const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState<any>(null);
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const response = await axios.get('/api/admin/stats', { withCredentials: true });
                 setStats(response.data);
             } catch (err) {
-                console.error("Failed to fetch  stats");
+                console.error("Failed to fetch statistics");
             }
         };
         fetchStats();
     }, []);
+
+    const handleExportGlobalStats = async () => {
+        try {
+            const usersRes = await axios.get('/api/admin/users', { withCredentials: true });
+            const waitlistRes = await axios.get('/api/growth/stats', { withCredentials: true }); // Assuming this exists or similar
+
+            const headers = ["Category", "Total Count"];
+            const data = [
+                ["Total Practitioners", usersRes.data.length],
+                ["Waitlist Size", waitlistRes.data.count || stats.totalWaitlist]
+            ];
+
+            let csv = headers.join(",") + "\n";
+            data.forEach(row => csv += row.join(",") + "\n");
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Global_Stats_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            toast.success("Global statistics exported");
+        } catch (err) {
+            toast.error("Failed to export statistics");
+        }
+    };
+
+    const handleBroadcast = async () => {
+        const message = prompt("Enter broadcast message for all practitioners:");
+        if (!message) return;
+
+        try {
+            // This endpoint might need implementation if not present
+            await axios.post('/api/notifications/broadcast', { message, type: 'info' }, { withCredentials: true });
+            toast.success("Broadcast sent successfully");
+        } catch (err) {
+            toast.error("Failed to send broadcast");
+        }
+    };
 
     const cards = [
         { label: 'Total Practitioners', value: stats?.totalUsers || '...', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
@@ -92,14 +134,14 @@ export const AdminDashboard: React.FC = () => {
                         </div>
 
                         {/* Dummy Graph implementation for "Impressive" visual */}
-                        <div className="h-64 flex items-end gap-3 px-2">
+                        <div className="h-48 sm:h-64 flex items-end gap-1.5 sm:gap-3 px-2">
                             {[40, 65, 45, 90, 75, 85, 60, 95, 100, 80, 85, 92].map((h, i) => (
                                 <div key={i} className="flex-1 group relative">
                                     <div
                                         className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 rounded-lg transition-all duration-1000 ease-out delay-[i*50ms] group-hover:from-fuchsia-600 group-hover:to-blue-600"
                                         style={{ height: `${h}%` }}
                                     >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
                                             {h}% Efficiency
                                         </div>
                                     </div>
@@ -131,13 +173,22 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <h4 className="text-lg font-bold mb-4 relative z-10 text-white">Quick Actions</h4>
                         <div className="space-y-3 relative z-10">
-                            <button className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white">
+                            <button
+                                onClick={handleExportGlobalStats}
+                                className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white"
+                            >
                                 Export Global Stats <ArrowUpRight className="w-4 h-4" />
                             </button>
-                            <button className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white">
+                            <button
+                                onClick={handleBroadcast}
+                                className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white"
+                            >
                                 Broadcast Notification <ArrowUpRight className="w-4 h-4" />
                             </button>
-                            <button className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white">
+                            <button
+                                onClick={() => navigate('/admin/audit')}
+                                className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border border-white/10 text-white"
+                            >
                                 System Audit Log <ArrowUpRight className="w-4 h-4" />
                             </button>
                         </div>

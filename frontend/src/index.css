@@ -15,10 +15,11 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-[#07090f] dark:text-slate-200 antialiased selection:bg-blue-500/30 font-sans overflow-hidden transition-colors duration-500;
+    @apply bg-slate-50 text-slate-900 dark:bg-[#07090f] dark:text-slate-200 antialiased selection:bg-blue-500/30 font-sans transition-all duration-500;
     background-image:
       radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.03) 0%, transparent 40%),
       radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 40%);
+    overflow-x: hidden;
   }
 
   .dark body {
@@ -41,7 +42,7 @@
   }
 
   .glass-card-hover {
-    @apply hover:bg-white/10 hover:border-white/20 hover:shadow-blue-500/10;
+    @apply hover:bg-white dark:hover:bg-white/10 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1;
   }
 
   .neon-text-blue {

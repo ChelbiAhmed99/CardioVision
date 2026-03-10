@@ -133,25 +133,103 @@ export const SiteSettings: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Security Settings */}
+                    {/* Site Content Customization */}
+                    <div className="glass-card p-8 border border-slate-200 dark:border-white/5 space-y-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            Hero & Branding
+                        </h3>
+
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hero Title</label>
+                                    <input
+                                        type="text"
+                                        value={config.heroTitle || ''}
+                                        onChange={(e) => setConfig({ ...config, heroTitle: e.target.value })}
+                                        className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hero Highlight</label>
+                                    <input
+                                        type="text"
+                                        value={config.heroHighlight || ''}
+                                        onChange={(e) => setConfig({ ...config, heroHighlight: e.target.value })}
+                                        className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hero Subtitle</label>
+                                <textarea
+                                    value={config.heroSubtitle || ''}
+                                    onChange={(e) => setConfig({ ...config, heroSubtitle: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white min-h-[100px]"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Announcement Tag</label>
+                                <input
+                                    type="text"
+                                    value={config.announcementText || ''}
+                                    onChange={(e) => setConfig({ ...config, announcementText: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer & Contact */}
                     <div className="glass-card p-8 border border-slate-200 dark:border-white/5 space-y-6">
                         <h3 className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
                             <Shield className="w-4 h-4 text-emerald-500" />
-                            Security Protocol
+                            Footer & Contact
                         </h3>
-                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center gap-4">
-                            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
-                                <Lock className="w-5 h-5" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Email</label>
+                                <input
+                                    type="email"
+                                    value={config.contactEmail || ''}
+                                    onChange={(e) => setConfig({ ...config, contactEmail: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                />
                             </div>
-                            <div>
-                                <p className="text-xs font-bold text-emerald-500">End-to-End Encryption Active</p>
-                                <p className="text-[10px] text-emerald-600/60 uppercase font-black tracking-widest">SSL/TLS 1.3 enforced across all nodes</p>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Footer Text</label>
+                                <input
+                                    type="text"
+                                    value={config.footerText || ''}
+                                    onChange={(e) => setConfig({ ...config, footerText: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-6">
+                    {/* Security Protocol (Original) */}
+                    <div className="glass-card p-6 border border-slate-200 dark:border-white/5 space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                            <Shield className="w-3.5 h-3.5" />
+                            Security Protocol
+                        </h4>
+                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center gap-4">
+                            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
+                                <Lock className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-emerald-500">Encryption Active</p>
+                                <p className="text-[10px] text-emerald-600/60 uppercase font-black tracking-widest">SSL/TLS 1.3</p>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Database Info */}
                     <div className="glass-card p-6 border border-slate-200 dark:border-white/5 space-y-4">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
@@ -168,26 +246,6 @@ export const SiteSettings: React.FC = () => {
                                     <div className="h-full w-[24%] bg-blue-500"></div>
                                 </div>
                             </div>
-                            <button className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 dark:bg-white/5 hover:bg-white/10 transition-colors rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                <RefreshCw className="w-3.5 h-3.5" />
-                                Optimization Sync
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Notification Config */}
-                    <div className="glass-card p-6 border border-slate-200 dark:border-white/5 space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
-                            <Bell className="w-3.5 h-3.5" />
-                            Alert Routing
-                        </h4>
-                        <div className="space-y-3">
-                            {['Critical Errors', 'New Signups', 'System Performance', 'Security Alerts'].map((label) => (
-                                <div key={label} className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{label}</span>
-                                    <input type="checkbox" defaultChecked className="accent-blue-500" />
-                                </div>
-                            ))}
                         </div>
                     </div>
                 </div>

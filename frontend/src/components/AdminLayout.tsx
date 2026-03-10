@@ -8,7 +8,9 @@ import {
     ChevronLeft,
     ChevronRight,
     TrendingUp,
-    Shield
+    Shield,
+    Menu,
+    X
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
@@ -20,6 +22,7 @@ interface AdminLayoutProps {
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { authUser, logout } = useAuthStore();
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,8 +43,20 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-fuchsia-600/5 rounded-full blur-[150px]"></div>
             </div>
 
+            {/* Sidebar Overlay for Mobile */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={`${isCollapsed ? 'w-24' : 'w-72'} bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 flex flex-col z-40 relative px-4 py-8 shadow-2xl dark:shadow-none`}>
+            <aside className={`
+                ${isCollapsed ? 'w-24' : 'w-72'} 
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                fixed lg:relative h-full bg-white/80 dark:bg-[#040508]/60 backdrop-blur-3xl border-r border-slate-200 dark:border-white/5 transition-all duration-500 flex flex-col z-50 px-4 py-8 shadow-2xl dark:shadow-none
+            `}>
                 <div className="flex items-center gap-4 px-4 mb-20">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
                         <Activity className="w-6 h-6 text-white" />
@@ -62,7 +77,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                         return (
                             <button
                                 key={item.id}
-                                onClick={() => navigate(item.path)}
+                                onClick={() => {
+                                    navigate(item.path);
+                                    setIsMobileMenuOpen(false);
+                                }}
                                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group
                                     ${isActive
                                         ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
@@ -97,7 +115,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute -right-3 top-24 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-4 border-slate-50 dark:border-[#07090f] text-white hover:scale-110 transition-transform"
+                    className="hidden lg:flex absolute -right-3 top-24 w-6 h-6 bg-blue-600 rounded-full items-center justify-center border-4 border-slate-50 dark:border-[#07090f] text-white hover:scale-110 transition-transform"
                 >
                     {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
                 </button>
@@ -105,9 +123,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto relative z-10 custom-scrollbar">
-                <header className="h-20 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-10 sticky top-0 bg-white/40 dark:bg-[#07090f]/80 backdrop-blur-md z-30">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Administrative Suite</p>
+                <header className="h-20 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-4 lg:px-10 sticky top-0 bg-white/40 dark:bg-[#07090f]/80 backdrop-blur-md z-30">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+                        >
+                            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </button>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] hidden sm:block">Administrative Suite</p>
                     </div>
 
                     <div className="flex items-center gap-6">

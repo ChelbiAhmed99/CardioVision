@@ -191,10 +191,22 @@ export const getSettings = async (req, res) => {
 export const getPublicSettings = async (req, res) => {
     try {
         let settings = await Settings.findOne({
-            attributes: ['siteName', 'maintenanceMode']
+            attributes: [
+                'siteName', 'maintenanceMode', 'heroTitle', 'heroHighlight',
+                'heroSubtitle', 'announcementText', 'contactEmail', 'footerText'
+            ]
         });
         if (!settings) {
-            settings = { siteName: 'CardioVision', maintenanceMode: false };
+            settings = {
+                siteName: 'CardioVision',
+                maintenanceMode: false,
+                heroTitle: "GLS Analysis",
+                heroHighlight: "In Seconds.",
+                heroSubtitle: "The first clinical-grade AI platform for automated myocardial segmentation and quantitative biomechanical assessment.",
+                announcementText: "Next-Gen Echocardiography AI",
+                contactEmail: "contact@cardiovision.com",
+                footerText: "© 2026 CardioVision AI. All rights reserved."
+            };
         }
         res.status(200).json(settings);
     } catch (error) {
@@ -205,7 +217,10 @@ export const getPublicSettings = async (req, res) => {
 
 export const updateSettings = async (req, res) => {
     try {
-        const { siteName, maintenanceMode, allowSignups, maxUploadSize, apiRateLimit } = req.body;
+        const {
+            siteName, maintenanceMode, allowSignups, maxUploadSize, apiRateLimit,
+            heroTitle, heroHighlight, heroSubtitle, announcementText, contactEmail, footerText
+        } = req.body;
 
         let settings = await Settings.findOne();
         if (!settings) settings = await Settings.create({});
@@ -216,6 +231,12 @@ export const updateSettings = async (req, res) => {
             allowSignups,
             maxUploadSize,
             apiRateLimit,
+            heroTitle,
+            heroHighlight,
+            heroSubtitle,
+            announcementText,
+            contactEmail,
+            footerText,
             updatedBy: req.user.id
         });
 

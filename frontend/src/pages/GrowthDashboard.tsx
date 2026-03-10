@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
     Target,
     Zap,
@@ -107,10 +108,24 @@ const AdvancedMasteryChart: React.FC<{ data: { label: string; pct: number; color
 };
 
 export const GrowthDashboard: React.FC = () => {
+    const [realStats, setRealStats] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await axios.get('/api/growth/stats', { withCredentials: true });
+                setRealStats(response.data);
+            } catch (err) {
+                console.error("Failed to fetch growth stats");
+            }
+        };
+        fetchStats();
+    }, []);
+
     const stats = [
-        { label: 'Visiteurs Uniques', value: '130', sub: 'Canaux Multiples', icon: Globe, color: 'text-blue-600', bg: 'bg-blue-600/10' },
-        { label: 'Réponses Validées', value: '58', sub: 'Qualité 100%', icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
-        { label: 'Conversion Rate', value: '44.6%', sub: 'Benchmark Pro', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
+        { label: 'Visiteurs Uniques', value: realStats?.visits || '130', sub: 'Canaux Multiples', icon: Globe, color: 'text-blue-600', bg: 'bg-blue-600/10' },
+        { label: 'Réponses Validées', value: realStats?.count || '58', sub: 'Qualité 100%', icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
+        { label: 'Conversion Rate', value: `${realStats?.conversion_rate || '44.6'}%`, sub: 'Benchmark Pro', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
         { label: 'Indice d’Intérêt', value: '98%', sub: 'Validation Valeur', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-600/10' },
     ];
 
