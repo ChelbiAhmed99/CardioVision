@@ -76,6 +76,7 @@ app.use(
         target: process.env.FLASK_API_URL
       });
     },
+    parseReqBody: false,
     timeout: 30000, // 30s timeout
   })
 );
