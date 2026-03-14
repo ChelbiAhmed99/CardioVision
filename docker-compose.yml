@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   frontend:
     build:
@@ -20,17 +22,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    command: npm start
+    command: npm run server
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=${PORT:-3000}
-      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai:8080}
-      - JWT_SECRET=${JWT_SECRET:-dev-secret-stable-123}
-      - CLIENT_URL=${CLIENT_URL:-http://localhost:5173}
+      - NODE_ENV=development
+      - PORT=3000
+      - FLASK_API_URL=http://flask-ai:8080
+      - JWT_SECRET=dev-secret-stable-123
+      - CLIENT_URL=http://localhost:5173
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/frontend/node_modules
     depends_on:
       - flask-ai
 
@@ -40,16 +41,13 @@ services:
       dockerfile: Dockerfile.flask
     ports:
       - "8080:8080"
-    command: sh -c "mkdir -p models && wget -O models/r2plus1d_18_32_2_pretrained.pt https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt && wget -O models/deeplabv3_resnet50_random.pt https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt && python app.py"
+    command: python app.py
     environment:
-      - FLASK_ENV=${FLASK_ENV:-development}
-      - EF_MODEL_PATH=${EF_MODEL_PATH:-models/r2plus1d_18_32_2_pretrained.pt}
-      - SEG_MODEL_PATH=${SEG_MODEL_PATH:-models/deeplabv3_resnet50_random.pt}
-      - EF_MODEL_URL=${EF_MODEL_URL:-https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt}
-      - SEG_MODEL_URL=${SEG_MODEL_URL:-https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt}
-
-#    volumes:
-#      - ./backend:/app
-#      - ./backend/input:/app/input
-#      - ./backend/output:/app/output
-#      - ./backend/models:/app/models
+      - FLASK_ENV=development
+      - EF_MODEL_PATH=models/r2plus1d_18_32_2_pretrained.pt
+      - SEG_MODEL_PATH=models/deeplabv3_resnet50_random.pt
+    volumes:
+      - ./backend:/app
+      - ./backend/input:/app/input
+      - ./backend/output:/app/output
+      - ./backend/models:/app/models

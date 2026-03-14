@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import proxy from "express-http-proxy";
+import morgan from "morgan";
+import chalk from "chalk";
 
 import videoRoutes from "./routes/videos.routes.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -39,12 +41,29 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-
-// Railway dynamic port
 const PORT = process.env.PORT || 3000;
 
-console.log(`📡 Environment: ${process.env.NODE_ENV}`);
-console.log(`🔗 Target FLASK_API_URL: ${process.env.FLASK_API_URL || "Using fallback http://127.0.0.1:8080"}`);
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "CardioVision API running" });
+});
+
+// Professional logging
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+
+const printBanner = () => {
+  console.log(chalk.cyan(`
+    ┌─────────────────────────────────────────────────────────┐
+    │                                                         │
+    │    ${chalk.bold.white('CardioVision API Service')}                       │
+    │    ${chalk.dim('Local Development Mode')}                             │
+    │                                                         │
+    │    ${chalk.green('🚀 Backend:')}   ${chalk.underline('http://localhost:' + PORT)}             │
+    │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || 'http://localhost:8080')}     │
+    │                                                         │
+    └─────────────────────────────────────────────────────────┘
+    `));
+};
 
 // Middleware
 app.use(express.json());
@@ -113,7 +132,8 @@ const startServer = async () => {
     await connectToSQLite(); // Ensure DB connection before listening
     await initAdmin(); // Auto-initialize admin account
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 CardioVision server running on port ${PORT}`);
+      printBanner();
+      console.log(chalk.green(`✓ Server is listening and ready`));
     });
   } catch (error) {
     console.error("❌ Database connection failed:", error);
@@ -122,3 +142,4 @@ const startServer = async () => {
 };
 
 startServer();
+

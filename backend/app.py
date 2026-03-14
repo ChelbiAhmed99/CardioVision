@@ -12,6 +12,36 @@ import numpy as np
 from matplotlib import pyplot as plt
 import cv2
 from download_models import download_models
+import logging
+
+# Professional Logging Configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("CardioVision-AI")
+
+# Suppress Flask default logs for a cleaner output
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+def print_ai_banner(port):
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    WHITE = "\033[97m"
+    BOLD = "\033[1m"
+    CYAN = "\033[96m"
+    RESET = "\033[0m"
+    DIM = "\033[2m"
+
+    print(f"{CYAN}")
+    print("    ┌─────────────────────────────────────────────────────────┐")
+    print("    │                                                         │")
+    print(f"    │    {BOLD}{WHITE}CardioVision AI Analysis Engine{RESET}{CYAN}             │")
+    print(f"    │    {DIM}Internal Neural Network Service{RESET}{CYAN}              │")
+    print("    │                                                         │")
+    print(f"    │    {GREEN}🚀 AI Service:{RESET} {WHITE}http://localhost:{port}{RESET}{CYAN}            │")
+    print(f"    │    {BLUE}🧠 Models:{RESET}     {DIM}r2plus1d_18, deeplabv3_res50{RESET}{CYAN}      │")
+    print("    │                                                         │")
+    print("    └─────────────────────────────────────────────────────────┘")
+    print(f"{RESET}")
 
 def loadvideo(filename: str) -> np.ndarray:
     if not os.path.exists(filename):
@@ -1100,11 +1130,9 @@ def get_video_ecg():
 
 
 if __name__ == "__main__":
-    # In Railway, the PORT variable is assigned by the platform (usually 8080)
     port = int(os.environ.get("PORT", 8080))
-    print(f"🚀 CardioVision AI backend starting...")
-    print(f"📡 Binding to [::]:{port} (Supports IPv4 and IPv6)")
-    # Using host='::' allows the app to listen on all IPv6 and IPv4 interfaces
+    print_ai_banner(port)
+    print(f"\033[92m✓ AI Analysis Engine is ready and watching for tasks\033[0m")
     app.run(host="::", port=port, debug=False)
 
 

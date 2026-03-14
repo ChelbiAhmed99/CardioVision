@@ -15,16 +15,13 @@ RUN apk add --no-cache python3 make g++
 
 # Copy backend package files
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install
 
-# Copy backend source
-COPY backend ./backend
-
-# Copy built frontend from build stage
-COPY --from=frontend-build /app/frontend/dist ./frontend/dist
+# Copy source
+COPY . .
 
 # Expose port
 EXPOSE 3000
 
 # Start the server
-CMD ["node", "backend/server.js"]
+CMD ["npm", "run", "server"]

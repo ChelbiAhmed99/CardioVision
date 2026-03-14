@@ -19,7 +19,7 @@ export const connectToSQLite = async () => {
         // Sync models - creating tables if they don't exist. 
         // Note: 'alter: true' is disabled because it is unstable with SQLite 
         // and causes unique constraint errors during table migrations.
-        await sequelize.sync({ alter: true });
+        await sequelize.sync();
         console.log('Database tables synchronized.');
     } catch (error) {
         console.error('Unable to connect to the SQLite database:', error);
