@@ -473,7 +473,7 @@ def get_pretrained_model():
     ef_model = torchvision.models.video.r2plus1d_18(pretrained=False)
     ef_model.fc = torch.nn.Linear(ef_model.fc.in_features, 1)
     device = torch.device("cpu")
-    ef_model_path = os.path.join(os.path.dirname(__file__), 'models', 'r2plus1d_18_32_2_pretrained.pt')
+    ef_model_path = os.getenv('EF_MODEL_PATH', os.path.join(os.path.dirname(__file__), 'models', 'r2plus1d_18_32_2_pretrained.pt'))
     checkpoint = torch.load(ef_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     ef_model.load_state_dict(state_dict_cpu)
@@ -481,7 +481,7 @@ def get_pretrained_model():
     seg_model = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=False)
     seg_model.classifier[-1] = torch.nn.Conv2d(seg_model.classifier[-1].in_channels, 1, kernel_size=seg_model.classifier[-1].kernel_size)
 
-    seg_model_path = os.path.join(os.path.dirname(__file__), 'models', 'deeplabv3_resnet50_random.pt')
+    seg_model_path = os.getenv('SEG_MODEL_PATH', os.path.join(os.path.dirname(__file__), 'models', 'deeplabv3_resnet50_random.pt'))
     checkpoint = torch.load(seg_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     seg_model.load_state_dict(state_dict_cpu)

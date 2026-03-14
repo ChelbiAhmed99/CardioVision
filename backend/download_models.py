@@ -6,11 +6,12 @@ MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # GitHub Release URL base with the correct tag v1.0
-RELEASE_URL = 'https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/'
+EF_URL_DEFAULT = 'https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt'
+SEG_URL_DEFAULT = 'https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt'
 
 MODELS = {
-    'r2plus1d_18_32_2_pretrained.pt': RELEASE_URL + 'r2plus1d_18_32_2_pretrained.pt',
-    'deeplabv3_resnet50_random.pt': RELEASE_URL + 'deeplabv3_resnet50_random.pt'
+    'r2plus1d_18_32_2_pretrained.pt': os.getenv('EF_MODEL_URL', EF_URL_DEFAULT),
+    'deeplabv3_resnet50_random.pt': os.getenv('SEG_MODEL_URL', SEG_URL_DEFAULT)
 }
 
 def download_models():
