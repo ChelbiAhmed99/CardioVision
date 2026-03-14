@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile.flask
     ports:
       - "8080:8080"
-    command: python app.py
+    command: sh -c "mkdir -p models && wget -O models/r2plus1d_18_32_2_pretrained.pt https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt && wget -O models/deeplabv3_resnet50_random.pt https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt && python app.py"
     environment:
       - FLASK_ENV=${FLASK_ENV:-development}
       - EF_MODEL_PATH=${EF_MODEL_PATH:-models/r2plus1d_18_32_2_pretrained.pt}
