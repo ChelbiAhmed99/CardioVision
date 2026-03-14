@@ -47,8 +47,9 @@ services:
       - SEG_MODEL_PATH=${SEG_MODEL_PATH:-models/deeplabv3_resnet50_random.pt}
       - EF_MODEL_URL=${EF_MODEL_URL:-https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/r2plus1d_18_32_2_pretrained.pt}
       - SEG_MODEL_URL=${SEG_MODEL_URL:-https://github.com/ChelbiAhmed99/CardioVision/releases/download/v1.0/deeplabv3_resnet50_random.pt}
-    volumes:
-      - ./backend:/app
-      - ./backend/input:/app/input
-      - ./backend/output:/app/output
-      - ./backend/models:/app/models
+
+#    volumes:
+#      - ./backend:/app
+#      - ./backend/input:/app/input
+#      - ./backend/output:/app/output
+#      - ./backend/models:/app/models

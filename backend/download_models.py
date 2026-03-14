@@ -2,7 +2,7 @@ import os
 import wget
 import requests
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
+MODEL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # GitHub Release URL base with the correct tag v1.0

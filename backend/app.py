@@ -468,23 +468,57 @@ period = 1 #2
 batch_size = 20
 def get_pretrained_model():
     # Ensure models are present
-    download_models()
+    print("🔍 Checking if AI models are present...")
+    try:
+        download_models()
+    except Exception as e:
+        print(f"⚠️ Warning during model download: {e}")
     
+    device = torch.device("cpu")
+    
+    # EF Model
     ef_model = torchvision.models.video.r2plus1d_18(pretrained=False)
     ef_model.fc = torch.nn.Linear(ef_model.fc.in_features, 1)
-    device = torch.device("cpu")
+    
     ef_model_path = os.getenv('EF_MODEL_PATH', os.path.join(os.path.dirname(__file__), 'models', 'r2plus1d_18_32_2_pretrained.pt'))
+    print(f"📦 Loading EF model from: {ef_model_path}")
+    
+    if not os.path.exists(ef_model_path):
+        print(f"❌ ERROR: EF model file not found at {ef_model_path}")
+        # Try to find it in the models directory directly
+        fallback_path = os.path.join(os.path.dirname(__file__), 'models', 'r2plus1d_18_32_2_pretrained.pt')
+        if os.path.exists(fallback_path):
+            print(f"💡 Found EF model at fallback path: {fallback_path}")
+            ef_model_path = fallback_path
+        else:
+            raise FileNotFoundError(f"Could not find EF model at {ef_model_path} or {fallback_path}")
+
     checkpoint = torch.load(ef_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     ef_model.load_state_dict(state_dict_cpu)
+    print("✅ EF model loaded successfully")
 
+    # Seg Model
     seg_model = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=False)
     seg_model.classifier[-1] = torch.nn.Conv2d(seg_model.classifier[-1].in_channels, 1, kernel_size=seg_model.classifier[-1].kernel_size)
 
     seg_model_path = os.getenv('SEG_MODEL_PATH', os.path.join(os.path.dirname(__file__), 'models', 'deeplabv3_resnet50_random.pt'))
+    print(f"📦 Loading Segmentation model from: {seg_model_path}")
+
+    if not os.path.exists(seg_model_path):
+        print(f"❌ ERROR: Segmentation model file not found at {seg_model_path}")
+        fallback_path = os.path.join(os.path.dirname(__file__), 'models', 'deeplabv3_resnet50_random.pt')
+        if os.path.exists(fallback_path):
+            print(f"💡 Found Segmentation model at fallback path: {fallback_path}")
+            seg_model_path = fallback_path
+        else:
+            raise FileNotFoundError(f"Could not find Segmentation model at {seg_model_path} or {fallback_path}")
+
     checkpoint = torch.load(seg_model_path, map_location="cpu", weights_only=False)
     state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
     seg_model.load_state_dict(state_dict_cpu)
+    print("✅ Segmentation model loaded successfully")
+    
     return seg_model, ef_model
 
 seg_model, ef_model = get_pretrained_model()
