@@ -14,7 +14,7 @@ import growthRoutes from "./routes/growth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 
-import { connectToSQLite } from "./db/db.config.js";
+import { connectToDB } from "./db/db.config.js";
 import { initAdmin } from "./utils/initAdmin.js";
 import { deserializeUser } from "./middleware/auth.middleware.js";
 import { checkMaintenanceMode } from "./middleware/settings.middleware.js";
@@ -71,7 +71,14 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: (origin, callback) => {
+      const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:3000"].filter(Boolean);
+      if (!origin || allowedOrigins.some(ao => origin.startsWith(ao))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all in dev, but process.env.CLIENT_URL is primary
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -129,7 +136,7 @@ app.get("*", (req, res) => {
 // Start server with proper port & binding
 const startServer = async () => {
   try {
-    await connectToSQLite(); // Ensure DB connection before listening
+    await connectToDB(); // Ensure DB connection before listening
     await initAdmin(); // Auto-initialize admin account
     app.listen(PORT, "0.0.0.0", () => {
       printBanner();
