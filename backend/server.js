@@ -44,7 +44,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 console.log(`📡 Environment: ${process.env.NODE_ENV}`);
-console.log(`🔗 Target FLASK_API_URL: ${process.env.FLASK_API_URL || "Using fallback http://127.0.0.1:5000"}`);
+console.log(`🔗 Target FLASK_API_URL: ${process.env.FLASK_API_URL || "Using fallback http://127.0.0.1:8080"}`);
 
 // Middleware
 app.use(express.json());
@@ -66,7 +66,7 @@ app.get("/health", (req, res) => {
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  proxy(process.env.FLASK_API_URL || "http://127.0.0.1:5000", {
+  proxy(process.env.FLASK_API_URL || "http://127.0.0.1:8080", {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
     proxyErrorHandler: (err, res, next) => {
       console.error(`❌ Proxy Error to Flask: ${err.code} - ${err.message}`);

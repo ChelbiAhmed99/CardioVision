@@ -925,103 +925,142 @@ def after_request(response):
 
 @app.route("/video-output", methods=['GET'])
 def video_output():
-    # Check if the request has a file
-    out_files = [f for f in os.listdir(OUTPUT_FOLDER)]
-    for file in out_files:
+    # Check for existing videos in INPUT_FOLDER
+    avi_files = [f for f in os.listdir(INPUT_FOLDER) if f.endswith('.avi')]
+    if not avi_files:
+        return jsonify({"error": "No videos found for processing"}), 400
+
+    # Clear output folder at the start of a batch
+    for file in os.listdir(OUTPUT_FOLDER):
         os.remove(os.path.join(OUTPUT_FOLDER, file))
-    print(os.listdir(OUTPUT_FOLDER))
-    retain_latest_video(INPUT_FOLDER)
-    print("Redundant videos deleted")
 
+    results = []
     try:
-        print("Model started")
-        res = final_result(seg_model, ef_model, INPUT_FOLDER, OUTPUT_FOLDER)
-        print("Model ended")
+        # Sort to ensure consistent order (e.g., video_0.avi, video_1.avi)
+        avi_files.sort()
+        
+        for idx, filename in enumerate(avi_files):
+            print(f"--- Processing Video {idx}: {filename} ---")
+            
+            # Temporary single-file environment for final_result
+            # We create a temporary input folder for just this video
+            temp_input = f"temp_input_{idx}"
+            os.makedirs(temp_input, exist_ok=True)
+            import shutil
+            shutil.copy(os.path.join(INPUT_FOLDER, filename), os.path.join(temp_input, filename))
+            
+            # Temporary output folder for just this video
+            temp_output = f"temp_output_{idx}"
+            os.makedirs(temp_output, exist_ok=True)
+            
+            res = final_result(seg_model, ef_model, temp_input, temp_output)
+            
+            # Move and rename outputs to main OUTPUT_FOLDER
+            mask_video_path = os.path.join(temp_output, "mask.mp4")
+            mask_gif_path = os.path.join(OUTPUT_FOLDER, f"mask_{idx}.gif")
+            if os.path.exists(mask_video_path):
+                print(f"Converting mask.mp4 for video {idx} to gif...")
+                video_clip = VideoFileClip(mask_video_path)
+                video_clip.write_gif(mask_gif_path)
+                video_clip.close()
 
-        mask_video_path = os.path.join(OUTPUT_FOLDER, "mask.mp4")
-        mask_gif_path = os.path.join(OUTPUT_FOLDER, "mask.gif")
-        if os.path.exists(mask_video_path):
-            print("Converting mask.mp4 to mask.gif...")
-            video_clip = VideoFileClip(mask_video_path)
-            video_clip.write_gif(mask_gif_path)
-            video_clip.close()
-            print("mask.gif created successfully.")
+            ecg_video_path = os.path.join(temp_output, "ecg.mp4")
+            ecg_gif_path = os.path.join(OUTPUT_FOLDER, f"ecg_{idx}.gif")
+            if os.path.exists(ecg_video_path):
+                print(f"Converting ecg.mp4 for video {idx} to gif...")
+                video_clip = VideoFileClip(ecg_video_path)
+                video_clip.write_gif(ecg_gif_path)
+                video_clip.close()
+            
+            # Add identification to result
+            res["index"] = idx
+            res["filename"] = filename
+            results.append(res)
+            
+            # Cleanup temp folders
+            shutil.rmtree(temp_input)
+            shutil.rmtree(temp_output)
 
-        mask_video_path = os.path.join(OUTPUT_FOLDER, "ecg.mp4")
-        mask_gif_path = os.path.join(OUTPUT_FOLDER, "ecg.gif")
-        if os.path.exists(mask_video_path):
-            print("Converting ecg.mp4 to ecg.gif...")
-            video_clip = VideoFileClip(mask_video_path)
-            video_clip.write_gif(mask_gif_path)
-            video_clip.close()
-            print("ecg.gif created successfully.")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
-    print(res)
     
-    
-    return jsonify(res)
+    return jsonify(results if len(results) > 1 else results[0])
 
 @app.route('/get-video/mask', methods=['GET'])
 def get_video_mask():
     try:
-        # Path to your .avi file
-        video_path = './output/mask.gif'
-        print(" video path status", os.path.exists(video_path))
-        
-        # Serve the file using send_file
-        return send_file(
-            video_path,
-            as_attachment=False,  # Set to False to display in browser
-            mimetype='image/gif'   # MIME type for .avi files
-        )
+        index = request.args.get('index', '0')
+        video_path = f'./output/mask_{index}.gif'
+        # Fallback to old name if not indexed (for backward compatibility)
+        if not os.path.exists(video_path):
+            video_path = './output/mask.gif'
+            
+        print(f"Serving mask: {video_path} (exists: {os.path.exists(video_path)})")
+        return send_file(video_path, as_attachment=False, mimetype='image/gif')
     except Exception as e:
         return str(e), 500
 
 @app.route('/api/video', methods=['POST'])
 def upload_video():
     print(f"📥 Received upload request. Files: {request.files}")
-    if 'video' not in request.files:
-        print("❌ Error: 'video' key missing in request.files")
-        return jsonify({"error": "No video file provided"}), 400
-    file = request.files['video']
-    if file.filename == '':
-        print("❌ Error: Empty filename")
-        return jsonify({"error": "No selected file"}), 400
-    if file:
-        # Clear intake folder to ensure only the NEW video exists
+    
+    # We now support 'video' or 'video_0', 'video_1', etc.
+    upload_keys = [k for k in request.files.keys() if k == 'video' or k.startswith('video_')]
+    
+    if not upload_keys:
+        return jsonify({"error": "No video files provided"}), 400
+
+    # If it's a fresh batch (e.g. video_0 or single 'video'), clear the input folder
+    if 'video_0' in upload_keys or 'video' in upload_keys:
         for old_file in os.listdir(INPUT_FOLDER):
             if old_file.endswith('.avi'):
                 os.remove(os.path.join(INPUT_FOLDER, old_file))
+
+    saved_files = []
+    for key in upload_keys:
+        file = request.files[key]
+        if file.filename == '': continue
         
+        # Determine index for filename
+        if key == 'video':
+            idx = 0
+        else:
+            try:
+                idx = int(key.split('_')[1])
+            except:
+                idx = 0
+                
         filename = secure_filename(file.filename)
-        # Ensure it ends with .avi as expected by the processing logic
         if not filename.endswith('.avi'):
             base = os.path.splitext(filename)[0]
-            filename = base + ".avi"
-        
+            filename = f"{base}_{idx}.avi"
+        else:
+            base = filename[:-4]
+            filename = f"{base}_{idx}.avi"
+            
         file_path = os.path.join(INPUT_FOLDER, filename)
         file.save(file_path)
+        saved_files.append(filename)
         print(f"Validated Video Stored: {file_path}")
-        return jsonify({
-            "message": "Video uploaded successfully", 
-            "filename": filename,
-            "status": "READY_FOR_ANALYSIS"
-        }), 201
-    
+
+    return jsonify({
+        "message": f"{len(saved_files)} video(s) uploaded successfully", 
+        "filenames": saved_files,
+        "status": "READY_FOR_ANALYSIS"
+    }), 201
+
 @app.route('/get-video/ecg', methods=['GET'])
 def get_video_ecg():
     try:
-        # Path to your .avi file
-        video_path = './output/ecg.gif'
-        print(" video path status", os.path.exists(video_path))
-        
-        # Serve the file using send_file
-        return send_file(
-            video_path,
-            as_attachment=False,  # Set to False to display in browser
-            mimetype='image/gif'    # MIME type for .avi files
-        )
+        index = request.args.get('index', '0')
+        video_path = f'./output/ecg_{index}.gif'
+        if not os.path.exists(video_path):
+            video_path = './output/ecg.gif'
+            
+        print(f"Serving ECG: {video_path} (exists: {os.path.exists(video_path)})")
+        return send_file(video_path, as_attachment=False, mimetype='image/gif')
     except Exception as e:
         return str(e), 500
 

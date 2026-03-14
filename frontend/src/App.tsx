@@ -50,14 +50,15 @@ function HomeContent() {
 
   const [selectedModel, setSelectedModel] = useState('lung');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [inputVideo, setInputVideo] = useState<string | null>(null);
+  const [inputVideos, setInputVideos] = useState<(string | null)[]>([null, null]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isUploadReady, setIsUploadReady] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [analysisResult, setAnalysisResult] = useState<any | null>(null);
+  const [isUploadReady, setIsUploadReady] = useState<boolean[]>([false, false]);
+  const [uploadProgress, setUploadProgress] = useState<number[]>([0, 0]);
+  const [analysisResults, setAnalysisResults] = useState<any[] | null>(null);
   const [comparisonRecords, setComparisonRecords] = useState<any[] | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [tempPatientId, setTempPatientId] = useState<string>('');
+  const [isComparisonMode, setIsComparisonMode] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   useEffect(() => {
@@ -72,62 +73,115 @@ function HomeContent() {
       if (!response.ok) throw new Error('Failed to fetch demo video');
       const blob = await response.blob();
       const file = new File([blob], url.split('/').pop() || 'demo.avi', { type: 'video/x-msvideo' });
-      handleVideoSelect(file);
+      await handleVideoSelect(file);
     } catch (error) {
       console.error('Error loading demo video:', error);
     }
   };
 
-  const handleVideoSelect = (file: File | null) => {
+  const uploadToBackend = async (file: File, index: number) => {
+    const formData = new FormData();
+    formData.append(isComparisonMode ? `video_${index}` : 'video', file);
+
+    try {
+      const response = await fetch('/api/ai/api/video', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Failed to upload video');
+
+      setIsUploadReady(prev => {
+        const nr = [...prev];
+        nr[index] = true;
+        return nr;
+      });
+    } catch (error: any) {
+      console.error('Upload Error:', error);
+    }
+  };
+
+  const handleVideoSelect = async (file: File | null, index: number = 0) => {
     if (!file) {
-      if (inputVideo) URL.revokeObjectURL(inputVideo);
-      setInputVideo(null);
-      setUploadProgress(0);
-      setAnalysisResult(null);
-      setIsUploadReady(false);
+      if (inputVideos[index]) URL.revokeObjectURL(inputVideos[index]!);
+      setInputVideos(prev => {
+        const nv = [...prev];
+        nv[index] = null;
+        return nv;
+      });
+      setUploadProgress(prev => {
+        const np = [...prev];
+        np[index] = 0;
+        return np;
+      });
+      setAnalysisResults(null);
+      setIsUploadReady(prev => {
+        const nr = [...prev];
+        nr[index] = false;
+        return nr;
+      });
       return;
     }
     const videoURL = URL.createObjectURL(file);
-    setInputVideo(videoURL);
-    setIsUploadReady(false);
+    setInputVideos(prev => {
+      const nv = [...prev];
+      nv[index] = videoURL;
+      return nv;
+    });
+    setIsUploadReady(prev => {
+      const nr = [...prev];
+      nr[index] = false;
+      return nr;
+    });
+
     let progress = 0;
     const interval = setInterval(() => {
       progress += 20;
-      setUploadProgress(Math.min(progress, 100));
+      setUploadProgress(prev => {
+        const np = [...prev];
+        np[index] = Math.min(progress, 100);
+        return np;
+      });
       if (progress >= 100) {
         clearInterval(interval);
-        setIsUploadReady(true);
       }
     }, 150);
+
+    // Perform actual upload
+    await uploadToBackend(file!, index);
   };
 
   const handleSubmit = async () => {
-    if (!inputVideo) return;
+    if (!inputVideos[0]) return;
     setIsProcessing(true);
-    setAnalysisResult(null);
+    setAnalysisResults(null);
     try {
       const response = await fetch('/video-output');
       if (!response.ok) throw new Error('Video processing failed');
       const result = await response.json();
-      setAnalysisResult(result);
+
+      const resultsArray = Array.isArray(result) ? result : [result];
+      setAnalysisResults(resultsArray);
 
       // Save to history automatically
-      await saveToHistory({
-        patientId: selectedPatientId || tempPatientId || `PAT_UNSPECIFIED_${Math.floor(Math.random() * 10000)}`,
-        videoPath: inputVideo,
-        metrics: {
-          ejectionFraction: result.ejectionFraction,
-          simpsonEF: result.simpsonEF,
-          gls: result.gls,
-          edVolume: result.edVolume,
-          esVolume: result.esVolume
-        },
-        diagnosis: {
-          problem: result.problem,
-          cause: result.cause,
-          cure: result.cure
-        }
-      });
+      for (const res of resultsArray) {
+        await saveToHistory({
+          patientId: selectedPatientId || tempPatientId || `PAT_UNSPECIFIED_${Math.floor(Math.random() * 10000)}`,
+          videoPath: inputVideos[res.index || 0],
+          metrics: {
+            ejectionFraction: res.ejectionFraction,
+            simpsonEF: res.simpsonEF,
+            gls: res.gls,
+            edVolume: res.edVolume,
+            esVolume: res.esVolume
+          },
+          diagnosis: {
+            problem: res.problem,
+            cause: res.cause,
+            cure: res.cure
+          }
+        });
+      }
 
       // Reset temp ID after successful analysis
       setTempPatientId('');
@@ -159,7 +213,7 @@ function HomeContent() {
             patientId={selectedPatientId}
             onBack={() => setSelectedPatientId(null)}
             onSelectRecord={(record) => {
-              setAnalysisResult(record.metrics ? { ...record.metrics, ...record.diagnosis } : null);
+              setAnalysisResults(record.metrics ? [{ ...record.metrics, ...record.diagnosis }] : null);
               setSelectedModel('default');
             }}
           />
@@ -188,9 +242,9 @@ function HomeContent() {
 
               <VideoUpload
                 onVideoSelect={handleVideoSelect}
-                onUploadComplete={() => setIsUploadReady(true)}
+                onUploadComplete={() => { }}
                 uploadProgress={uploadProgress}
-                selectedVideo={inputVideo}
+                selectedVideos={inputVideos}
                 onSubmit={handleSubmit}
                 isProcessing={isProcessing}
                 isUploadReady={isUploadReady}
@@ -198,9 +252,11 @@ function HomeContent() {
                 setSelectedPatientId={setSelectedPatientId}
                 tempPatientId={tempPatientId}
                 setTempPatientId={setTempPatientId}
+                isComparisonMode={isComparisonMode}
+                setIsComparisonMode={setIsComparisonMode}
               />
 
-              {!inputVideo && (
+              {!inputVideos[0] && (
                 <div className="mt-12">
                   <h3 className="text-lg font-bold text-slate-400 dark:text-slate-300 mb-6 flex items-center gap-2">
                     <Shield className="w-5 h-5 text-emerald-400" />
@@ -211,9 +267,9 @@ function HomeContent() {
               )}
 
               <ResultView
-                inputVideo={inputVideo || ''}
+                inputVideos={inputVideos}
                 isProcessing={isProcessing}
-                analysisResult={analysisResult}
+                analysisResults={analysisResults}
               />
             </div>
           </div>

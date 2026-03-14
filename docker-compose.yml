@@ -6,8 +6,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://express-backend:3000
       - VITE_PROXY_TARGET=http://express-backend:3000
+      - VITE_FLASK_TARGET=http://flask-ai:8080
     volumes:
       - ./frontend:/app/frontend
       - /app/frontend/node_modules
@@ -24,8 +24,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - FLASK_API_URL=http://flask-ai:5000
+      - FLASK_API_URL=http://flask-ai:8080
       - JWT_SECRET=dev-secret-stable-123
+      - CLIENT_URL=http://localhost:5173
     volumes:
       - .:/app
       - /app/node_modules
@@ -38,7 +39,7 @@ services:
       context: .
       dockerfile: Dockerfile.flask
     ports:
-      - "5000:5000"
+      - "8080:8080"
     command: python app.py
     environment:
       - FLASK_ENV=development

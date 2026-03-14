@@ -1,43 +1,43 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LoadingAnimation } from './LoadingAnimation';
 import { CardiacMetrics } from './CardiacMetrics';
 import { DiagnosisSection } from './DiagnosisSection';
-import { HeartVideo } from './HeartVideo';
-import { Activity, Heart, Printer, Share2, Download } from 'lucide-react';
+import { Activity, Printer, Download } from 'lucide-react';
 import { BullsEye } from './BullsEye';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
 
+interface AnalysisResult {
+  ejectionFraction: number;
+  simpsonEF: number;
+  problem: string;
+  cause: string;
+  cure: string;
+  gls: number;
+  prognosticInsight: string;
+  bullsEyeData: number[];
+  edVolume: number;
+  esVolume: number;
+  index?: number;
+  filename?: string;
+}
+
 interface ResultViewProps {
-  inputVideo: string;
+  inputVideos: (string | null)[];
   isProcessing: boolean;
-  analysisResult: {
-    ejectionFraction: number;
-    simpsonEF: number;
-    problem: string;
-    cause: string;
-    cure: string;
-    gls: number;
-    prognosticInsight: string;
-    bullsEyeData: number[];
-    edVolume: number;
-    esVolume: number;
-  } | null;
+  analysisResults: AnalysisResult[] | null;
 }
 
 export function ResultView({
-  inputVideo,
+  inputVideos,
   isProcessing,
-  analysisResult
+  analysisResults
 }: ResultViewProps) {
-  const inputVideoRef = useRef<HTMLVideoElement>(null);
-  const [maskGif, setMaskGif] = useState<string | null>(null);
-  const [ecgGif, setEcgGif] = useState<string | null>(null);
+  const [maskGifs, setMaskGifs] = useState<(string | null)[]>([null, null]);
+  const [ecgGifs, setEcgGifs] = useState<(string | null)[]>([null, null]);
 
-  const handleReport = () => {
-    if (!analysisResult) return;
-
+  const handleReport = (result: AnalysisResult) => {
     try {
       const doc = new jsPDF();
       const timestamp = new Date().toLocaleString();
@@ -50,12 +50,12 @@ export function ResultView({
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text(`Generated on: ${timestamp}`, 105, 28, { align: "center" });
-      doc.text("System ID: CV-X800-PRO | Clinical Grade AI", 105, 33, { align: "center" });
+      doc.text(`Sequence Index: ${result.index ?? 0} | Clinical Grade AI`, 105, 33, { align: "center" });
 
       doc.setDrawColor(226, 232, 240);
       doc.line(20, 40, 190, 40);
 
-      // Section: Patient & Session info
+      // Section: Findings
       doc.setFontSize(12);
       doc.setTextColor(0);
       doc.setFont("helvetica", "bold");
@@ -63,17 +63,17 @@ export function ResultView({
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Clinical Status: ${analysisResult.ejectionFraction < 45 ? 'Reduced EF (High Risk)' : 'Normal Cardiac Function'}`, 20, 58);
+      doc.text(`Clinical Status: ${result.ejectionFraction < 45 ? 'Reduced EF (High Risk)' : 'Normal Cardiac Function'}`, 20, 58);
 
       // Metrics Table
       autoTable(doc, {
         startY: 65,
         head: [['Clinical Metric', 'Value', 'Reference Range']],
         body: [
-          ['LVEF (Ejection Fraction)', `${analysisResult.ejectionFraction}%`, '50% - 70%'],
-          ['GLS (Strain Analysis)', `${analysisResult.gls}%`, '< -18%'],
-          ['ED Volume', `${analysisResult.edVolume} mL`, '60 - 150 mL'],
-          ['ES Volume', `${analysisResult.esVolume} mL`, '20 - 60 mL'],
+          ['LVEF (Ejection Fraction)', `${result.ejectionFraction}%`, '50% - 70%'],
+          ['GLS (Strain Analysis)', `${result.gls}%`, '< -18%'],
+          ['ED Volume', `${result.edVolume} mL`, '60 - 150 mL'],
+          ['ES Volume', `${result.esVolume} mL`, '20 - 60 mL'],
         ],
         theme: 'striped',
         headStyles: { fillColor: [37, 99, 235] }
@@ -87,13 +87,13 @@ export function ResultView({
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      const problemText = doc.splitTextToSize(`Finding: ${analysisResult.problem}`, 170);
+      const problemText = doc.splitTextToSize(`Finding: ${result.problem}`, 170);
       doc.text(problemText, 20, finalY + 8);
 
-      const causeText = doc.splitTextToSize(`Etiology: ${analysisResult.cause}`, 170);
+      const causeText = doc.splitTextToSize(`Etiology: ${result.cause}`, 170);
       doc.text(causeText, 20, finalY + 22);
 
-      const cureText = doc.splitTextToSize(`Recommendation: ${analysisResult.cure}`, 170);
+      const cureText = doc.splitTextToSize(`Recommendation: ${result.cure}`, 170);
       doc.text(cureText, 20, finalY + 36);
 
       doc.setFontSize(8);
@@ -114,206 +114,160 @@ export function ResultView({
 
   useEffect(() => {
     if (isProcessing) {
-      if (maskGif) URL.revokeObjectURL(maskGif);
-      if (ecgGif) URL.revokeObjectURL(ecgGif);
-      setMaskGif(null);
-      setEcgGif(null);
+      maskGifs.forEach(url => url && URL.revokeObjectURL(url));
+      ecgGifs.forEach(url => url && URL.revokeObjectURL(url));
+      setMaskGifs([null, null]);
+      setEcgGifs([null, null]);
       return;
     }
 
-    if (!isProcessing && analysisResult) {
+    if (!isProcessing && analysisResults) {
       const fetchResources = async () => {
-        try {
-          // Fetch mask GIF
-          const maskResponse = await fetch(`/api/ai/get-video/mask`);
-          if (!maskResponse.ok) {
-            throw new Error('Failed to fetch mask GIF');
-          }
-          const maskBlob = await maskResponse.blob();
-          const maskUrl = URL.createObjectURL(maskBlob);
-          setMaskGif(maskUrl);
+        const newMasks = [...maskGifs];
+        const newEcgs = [...ecgGifs];
 
-          // Fetch ECG GIF
-          const ecgResponse = await fetch(`/api/ai/get-video/ecg`);
-          if (!ecgResponse.ok) {
-            throw new Error('Failed to fetch ECG GIF');
+        for (let i = 0; i < analysisResults.length; i++) {
+          const res = analysisResults[i];
+          const idx = res.index ?? i;
+          try {
+            // Fetch mask GIF
+            const maskResponse = await fetch(`/api/ai/get-video/mask?index=${idx}`);
+            if (maskResponse.ok) {
+              const maskBlob = await maskResponse.blob();
+              newMasks[idx] = URL.createObjectURL(maskBlob);
+            }
+
+            // Fetch ECG GIF
+            const ecgResponse = await fetch(`/api/ai/get-video/ecg?index=${idx}`);
+            if (ecgResponse.ok) {
+              const ecgBlob = await ecgResponse.blob();
+              newEcgs[idx] = URL.createObjectURL(ecgBlob);
+            }
+          } catch (error) {
+            console.error(`Error fetching resources for index ${idx}:`, error);
           }
-          const ecgBlob = await ecgResponse.blob();
-          const ecgUrl = URL.createObjectURL(ecgBlob);
-          setEcgGif(ecgUrl);
-        } catch (error) {
-          console.error('Error fetching resources:', error);
         }
+        setMaskGifs(newMasks);
+        setEcgGifs(newEcgs);
       };
 
       fetchResources();
     }
 
     return () => {
-      if (maskGif) URL.revokeObjectURL(maskGif);
-      if (ecgGif) URL.revokeObjectURL(ecgGif);
+      maskGifs.forEach(url => url && URL.revokeObjectURL(url));
+      ecgGifs.forEach(url => url && URL.revokeObjectURL(url));
     };
-  }, [isProcessing, analysisResult, maskGif, ecgGif]);
+  }, [isProcessing, analysisResults]);
+
+  if (isProcessing) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 glass-card">
+        <LoadingAnimation />
+        <p className="mt-8 text-xs font-black uppercase tracking-widest text-slate-500 animate-pulse">
+          Concurrent Diagnostic Engine Running...
+        </p>
+      </div>
+    );
+  }
+
+  if (!analysisResults) return null;
+
+  const renderSingleResult = (result: AnalysisResult, index: number) => {
+    const inputVideo = inputVideos[result.index ?? index];
+    const maskGif = maskGifs[result.index ?? index];
+    const ecgGif = ecgGifs[result.index ?? index];
+
+    return (
+      <div key={index} className="space-y-12 animate-fade-in py-8 border-b-2 border-slate-100 dark:border-white/5 last:border-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs ${index === 0 ? 'bg-blue-600' : 'bg-cyan-600'}`}>
+              {index + 1}
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-500">
+                {index === 0 ? 'Baseline Assessment' : 'Follow-up Assessment'}
+              </h3>
+              <p className="text-[10px] text-slate-400 font-bold">Sequence ID: {result.filename || 'N/A'}</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleReport(result)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all"
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Echo Sequence</span>
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/5">
+              {inputVideo && <video src={inputVideo} className="absolute inset-0 w-full h-full object-contain" autoPlay loop muted playsInline />}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Segmentation Mask</span>
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-cardio-darker/50 border border-white/5">
+              {maskGif ? <img src={maskGif} className="absolute inset-0 w-full h-full object-contain" /> : <LoadingAnimation />}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">ECG Features</span>
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-cardio-darker/50 border border-white/5">
+              {ecgGif ? <img src={ecgGif} className="absolute inset-0 w-full h-full object-cover opacity-80" /> : <LoadingAnimation />}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mt-8">
+          <div className="lg:col-span-5 space-y-8">
+            <CardiacMetrics
+              ejectionFraction={result.ejectionFraction}
+              simpsonEF={result.simpsonEF}
+              gls={result.gls}
+              endDiastolicVolume={result.edVolume}
+              endSystolicVolume={result.esVolume}
+            />
+          </div>
+
+          <div className="lg:col-span-7">
+            <BullsEye data={result.bullsEyeData} />
+          </div>
+        </div>
+
+        <DiagnosisSection
+          ejectionFraction={result.ejectionFraction}
+          problem={result.problem}
+          cause={result.cause}
+          cure={result.cure}
+          prognosticInsight={result.prognosticInsight}
+        />
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-12">
-      {/* Print-only Header */}
-      <div className="print-header hidden print:block">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-black text-blue-600">CardioVision Clinical Report</h1>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Automated Echocardiography Diagnostic Output</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-bold">Date: {new Date().toLocaleDateString()}</p>
-            <p className="text-[10px] text-slate-400">System ID: CV-X800-PRO</p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between no-print">
+        <h2 className="text-2xl font-display font-black text-slate-900 dark:text-white tracking-tighter">
+          Analysis <span className="text-blue-600">Results</span>
+        </h2>
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 hover:bg-slate-200 transition-all no-print"
+        >
+          <Printer className="w-3.5 h-3.5" />
+          Print Session
+        </button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 no-print">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
-          <div className="w-6 h-1 bg-blue-500 rounded-full"></div>
-          Diagnostic Visualization
-        </h3>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={handleReport}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all group"
-          >
-            <Download className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-            PDF Report
-          </button>
-          <button
-            onClick={handlePrint}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 hover:bg-slate-200 transition-all no-print"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Print
-          </button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 hover:bg-slate-200 transition-all">
-            <Share2 className="w-3.5 h-3.5" />
-            Share
-          </button>
-        </div>
+      <div className="space-y-16">
+        {analysisResults.map((res, i) => renderSingleResult(res, i))}
       </div>
-
-      <div className="flex justify-center gap-8">
-        <div className="w-full lg:w-3/4 space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-3 no-print">
-            <div className="w-6 h-1 bg-blue-500 rounded-full"></div>
-            Original Echocardiogram
-          </h3>
-          <div className="relative overflow-hidden glass-card aspect-video border-white/5 group">
-            <video
-              ref={inputVideoRef}
-              src={inputVideo}
-              className="absolute inset-0 object-contain w-full h-full transition-transform duration-700 group-hover:scale-[1.02]"
-              controls
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-cardio-dark/40 to-transparent pointer-events-none"></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
-            <div className="w-6 h-1 bg-cyan-500 rounded-full"></div>
-            AI Myocardial Segmentation
-          </h3>
-          <div className="relative overflow-hidden glass-card aspect-video border-white/5 bg-cardio-darker/50 group">
-            {isProcessing ? (
-              <LoadingAnimation />
-            ) : maskGif ? (
-              <img
-                src={maskGif}
-                alt="Segmented Mask"
-                className="absolute inset-0 object-contain w-full h-full transition-all duration-500 group-hover:opacity-100 group-hover:scale-110"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-slate-600 flex-col gap-4">
-                <Activity className="w-10 h-10 animate-pulse-soft opacity-20" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Waiting for processing...</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
-            <div className="w-6 h-1 bg-fuchsia-500 rounded-full"></div>
-            ECG Feature Extraction
-          </h3>
-          <div className="relative overflow-hidden glass-card aspect-video border-white/5 bg-cardio-darker/50 group">
-            {isProcessing ? (
-              <LoadingAnimation />
-            ) : ecgGif ? (
-              <img
-                src={ecgGif}
-                alt="ECG Tracking"
-                className="absolute inset-0 object-cover w-full h-full opacity-80 transition-opacity duration-500 group-hover:opacity-100"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-slate-600 flex-col gap-4">
-                <Activity className="w-10 h-10 animate-pulse-soft opacity-20" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Waiting for ECG data...</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {!isProcessing && analysisResult && (
-        <div className="space-y-16 animate-fade-in-up">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-5 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20 shadow-lg shadow-blue-600/5">
-                  <Activity className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-display font-black text-slate-900 dark:text-white tracking-tighter">Clinical Metrics</h2>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Digital Cardiovascular Assessment</p>
-                </div>
-              </div>
-              <CardiacMetrics
-                ejectionFraction={analysisResult.ejectionFraction}
-                simpsonEF={analysisResult.simpsonEF}
-                gls={analysisResult.gls}
-                endDiastolicVolume={analysisResult.edVolume}
-                endSystolicVolume={analysisResult.esVolume}
-              />
-            </div>
-
-            <div className="lg:col-span-7 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-600/10 flex items-center justify-center border border-cyan-500/20 shadow-lg shadow-cyan-600/5">
-                  <Heart className="w-7 h-7 text-cyan-600 dark:text-cyan-400" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-display font-black text-slate-900 dark:text-white tracking-tighter">Regional Myodynamics</h2>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AHA 17-Segment Polar Mapping</p>
-                </div>
-              </div>
-              <BullsEye data={analysisResult.bullsEyeData} />
-            </div>
-          </div>
-
-          <DiagnosisSection
-            ejectionFraction={analysisResult.ejectionFraction}
-            problem={analysisResult.problem}
-            cause={analysisResult.cause}
-            cure={analysisResult.cure}
-            prognosticInsight={analysisResult.prognosticInsight}
-          />
-          <HeartVideo />
-        </div>
-      )}
     </div>
   );
 }
