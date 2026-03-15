@@ -11,7 +11,7 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
-from download_models import download_models
+# from download_models import download_models
 import logging
 
 # Professional Logging Configuration
@@ -497,12 +497,7 @@ frames = 32
 period = 1 #2
 batch_size = 20
 def get_pretrained_model():
-    # Ensure models are present
-    print("🔍 Checking if AI models are present...")
-    try:
-        download_models()
-    except Exception as e:
-        print(f"⚠️ Warning during model download: {e}")
+    # Models are expected to be present locally
     
     device = torch.device("cpu")
     
@@ -1003,47 +998,38 @@ def video_output():
         # Sort to ensure consistent order (e.g., video_0.avi, video_1.avi)
         avi_files.sort()
         
+        import tempfile
         for idx, filename in enumerate(avi_files):
             print(f"--- Processing Video {idx}: {filename} ---")
             
-            # Temporary single-file environment for final_result
-            # We create a temporary input folder for just this video
-            temp_input = f"temp_input_{idx}"
-            os.makedirs(temp_input, exist_ok=True)
-            import shutil
-            shutil.copy(os.path.join(INPUT_FOLDER, filename), os.path.join(temp_input, filename))
-            
-            # Temporary output folder for just this video
-            temp_output = f"temp_output_{idx}"
-            os.makedirs(temp_output, exist_ok=True)
-            
-            res = final_result(seg_model, ef_model, temp_input, temp_output)
-            
-            # Move and rename outputs to main OUTPUT_FOLDER
-            mask_video_path = os.path.join(temp_output, "mask.mp4")
-            mask_gif_path = os.path.join(OUTPUT_FOLDER, f"mask_{idx}.gif")
-            if os.path.exists(mask_video_path):
-                print(f"Converting mask.mp4 for video {idx} to gif...")
-                video_clip = VideoFileClip(mask_video_path)
-                video_clip.write_gif(mask_gif_path)
-                video_clip.close()
+            with tempfile.TemporaryDirectory() as temp_input:
+                with tempfile.TemporaryDirectory() as temp_output:
+                    import shutil
+                    shutil.copy(os.path.join(INPUT_FOLDER, filename), os.path.join(temp_input, filename))
+                    
+                    res = final_result(seg_model, ef_model, temp_input, temp_output)
+                    
+                    # Move and rename outputs to main OUTPUT_FOLDER
+                    mask_video_path = os.path.join(temp_output, "mask.mp4")
+                    mask_gif_path = os.path.join(OUTPUT_FOLDER, f"mask_{idx}.gif")
+                    if os.path.exists(mask_video_path):
+                        print(f"Converting mask.mp4 for video {idx} to gif...")
+                        video_clip = VideoFileClip(mask_video_path)
+                        video_clip.write_gif(mask_gif_path)
+                        video_clip.close()
 
-            ecg_video_path = os.path.join(temp_output, "ecg.mp4")
-            ecg_gif_path = os.path.join(OUTPUT_FOLDER, f"ecg_{idx}.gif")
-            if os.path.exists(ecg_video_path):
-                print(f"Converting ecg.mp4 for video {idx} to gif...")
-                video_clip = VideoFileClip(ecg_video_path)
-                video_clip.write_gif(ecg_gif_path)
-                video_clip.close()
-            
-            # Add identification to result
-            res["index"] = idx
-            res["filename"] = filename
-            results.append(res)
-            
-            # Cleanup temp folders
-            shutil.rmtree(temp_input)
-            shutil.rmtree(temp_output)
+                    ecg_video_path = os.path.join(temp_output, "ecg.mp4")
+                    ecg_gif_path = os.path.join(OUTPUT_FOLDER, f"ecg_{idx}.gif")
+                    if os.path.exists(ecg_video_path):
+                        print(f"Converting ecg.mp4 for video {idx} to gif...")
+                        video_clip = VideoFileClip(ecg_video_path)
+                        video_clip.write_gif(ecg_gif_path)
+                        video_clip.close()
+                    
+                    # Add identification to result
+                    res["index"] = idx
+                    res["filename"] = filename
+                    results.append(res)
 
     except Exception as e:
         import traceback
@@ -1133,6 +1119,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     print_ai_banner(port)
     print(f"\033[92m✓ AI Analysis Engine is ready and watching for tasks\033[0m")
-    app.run(host="::", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 

@@ -21,8 +21,5 @@ COPY backend/ ./
 # Exposer le port de l'application
 EXPOSE 8080
 
-# Télécharger les modèles nécessaires avant de lancer l'application
-RUN python download_models.py
-
 # Commande pour démarrer l'application Flask
 CMD ["python", "app.py"]

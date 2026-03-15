@@ -1,5 +1,3 @@
-
-
 services:
   frontend:
     build:
@@ -46,6 +44,7 @@ services:
       - FLASK_ENV=development
       - EF_MODEL_PATH=models/r2plus1d_18_32_2_pretrained.pt
       - SEG_MODEL_PATH=models/deeplabv3_resnet50_random.pt
+      - SKIP_MODEL_DOWNLOAD=true
     volumes:
       - ./backend:/app
       - ./backend/input:/app/input

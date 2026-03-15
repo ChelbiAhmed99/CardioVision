@@ -16,6 +16,10 @@ MODELS = {
 
 def download_models():
     """Downloads required AI models from GitHub Releases if not already present."""
+    if os.getenv('SKIP_MODEL_DOWNLOAD', 'false').lower() == 'true':
+        print("⏭️ Skipping model download check (SKIP_MODEL_DOWNLOAD=true)")
+        return
+
     for model_name, url in MODELS.items():
         path = os.path.join(MODEL_DIR, model_name)
         if not os.path.exists(path):
