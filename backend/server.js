@@ -121,17 +121,25 @@ const FLASK_URL = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  proxy(FLASK_URL, {
-    proxyReqPathResolver: (req) => {
-      const resolvedPath = req.originalUrl.replace("/api/ai", "");
-      // Safety check: prevent proxy loop if target accidentally points back to this server or the same port
+  (req, res, next) => {
+    // Determine if this request is about to loop
+    try {
       const targetUrl = new URL(FLASK_URL);
-      const isLocalhost = targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1';
-      if (isLocalhost && targetUrl.port == PORT) {
-        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DETECTED:')} FLASK_API_URL (${FLASK_URL}) appears to point to the current server port ${PORT}.`);
+      const isLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname.includes('railway') || targetUrl.hostname === req.hostname) && targetUrl.port == PORT;
+
+      if (isLoop) {
+        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DENIED:')} ${req.method} ${req.originalUrl} -> ${FLASK_URL}`);
+        return res.status(508).json({
+          error: "Proxy Loop Detected",
+          message: "The API attempted to call itself. Check FLASK_API_URL in your environment settings.",
+          details: { target: FLASK_URL, service_port: PORT }
+        });
       }
-      return resolvedPath;
-    },
+    } catch (e) { }
+    next();
+  },
+  proxy(FLASK_URL, {
+    proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
     proxyErrorHandler: (err, res, next) => {
       console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
 
