@@ -42,11 +42,12 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 let PORT = process.env.PORT || 3000;
-// Force 3000 in development if otherwise defaulting to 8080 (conflict with Flask)
-if (process.env.NODE_ENV !== 'production' && PORT == 8080) {
-  console.log(chalk.yellow('ℹ️ Port 8080 detected in development. Shifting to 3000 to avoid conflict with AI Service.'));
+// Force 3000 if otherwise defaulting to 8080 to avoid conflict with Flask AI Service
+if (PORT == 8080) {
+  console.log(chalk.yellow(`ℹ️ Port 8080 detected. Shifting to 3000 to avoid conflict with internal AI Service.`));
   PORT = 3000;
 }
+console.log(chalk.dim(`DEBUG: NODE_ENV=${process.env.NODE_ENV}, PORT=${PORT}, FLASK_URL=${process.env.FLASK_API_URL}`));
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -112,7 +113,8 @@ app.use(
       const resolvedPath = req.originalUrl.replace("/api/ai", "");
       // Safety check: prevent proxy loop if target accidentally points back to this server or the same port
       const targetUrl = new URL(FLASK_URL);
-      if ((targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname.includes('railway.internal')) && targetUrl.port == PORT) {
+      const isLocalhost = targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1';
+      if (isLocalhost && targetUrl.port == PORT) {
         console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DETECTED:')} FLASK_API_URL (${FLASK_URL}) appears to point to the current server port ${PORT}.`);
       }
       return resolvedPath;

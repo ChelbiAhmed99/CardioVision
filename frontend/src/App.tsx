@@ -86,7 +86,7 @@ function HomeContent() {
     formData.append(isComparisonMode ? `video_${index}` : 'video', file);
 
     try {
-      const response = await fetch('/api/ai/video', {
+      const response = await fetch('/api/ai/api/video', {
         method: 'POST',
         body: formData,
       });
