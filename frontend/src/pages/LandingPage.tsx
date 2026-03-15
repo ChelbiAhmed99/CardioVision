@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Shield, ArrowRight, Zap, Users, Menu, X } from 'lucide-react';
+import { Activity, Shield, ArrowRight, Zap, Users, Menu, X, Crown, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
@@ -16,6 +16,12 @@ export const LandingPage: React.FC = () => {
     contactEmail: 'contact@cardiovision.com',
     footerText: '© 2026 CardioVision AI. All rights reserved.',
   });
+
+  const tiers = [
+    { name: "Basic", price: "199", icon: Activity },
+    { name: "Professional", price: "199", icon: Zap, popular: true },
+    { name: "Enterprise", price: "Custom", icon: Crown }
+  ];
 
   React.useEffect(() => {
     const fetchSettings = async () => {
@@ -78,6 +84,7 @@ export const LandingPage: React.FC = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors">Solution</a>
+          <a href="#pricing" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors">Pricing</a>
           <a href="#clinical" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-500 transition-colors">Clinical Grade</a>
           <button className="flex items-center gap-2 px-6 py-2.5 glass-card dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:scale-105 transition-all">
             <Shield className="w-4 h-4 text-emerald-400" />
@@ -99,6 +106,7 @@ export const LandingPage: React.FC = () => {
         <div className="fixed inset-0 z-40 bg-white dark:bg-[#07090f] md:hidden animate-fade-in flex flex-col p-8 pt-32">
           <div className="space-y-8 flex flex-col items-center">
             <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white italic">Solution</a>
+            <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white italic">Pricing</a>
             <a href="#clinical" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white italic">Clinical Grade</a>
             <button className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-blue-600/20">
               <Shield className="w-5 h-5" />
@@ -148,8 +156,41 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Pricing Section Preview */}
+      <section id="pricing" className="relative z-10 px-6 py-32 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-display font-black tracking-tighter mb-4 italic">Pricing <span className="text-blue-500">Tiers</span></h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Professional solutions for every medical facility.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {tiers.map((tier, i) => (
+            <div key={i} className={`p-8 rounded-3xl glass-card transition-all duration-300 flex flex-col ${tier.popular ? 'border-blue-500/50 scale-105 z-10 shadow-2xl shadow-blue-500/20' : ''}`}>
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6">
+                <tier.icon className="w-6 h-6 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-3xl font-black italic">{tier.price !== 'Custom' ? `$${tier.price}` : tier.price}</span>
+                {tier.price !== 'Custom' && <span className="text-xs text-slate-500 font-bold tracking-widest uppercase">/mo</span>}
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                {[1, 2, 3].map((_, j) => (
+                  <li key={j} className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <Check className="w-3 h-3 text-emerald-500" />
+                    Premium Feature {j}
+                  </li>
+                ))}
+              </ul>
+              <button className={`w-full py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${tier.popular ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5'}`}>
+                Learn More
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features Grid */}
-      <section className="relative z-10 px-6 py-32 bg-slate-900 text-white">
+      <section id="features" className="relative z-10 px-6 py-32 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
@@ -178,7 +219,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Trust Section */}
-      <section className="relative z-10 px-6 py-24 max-w-7xl mx-auto text-center">
+      <section id="clinical" className="relative z-10 px-6 py-24 max-w-7xl mx-auto text-center">
         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-12">Trusted by clinicians at</h4>
         <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
           <div className="text-xl sm:text-2xl font-display font-black tracking-tighter">MAYO <span className="text-blue-500">CLINIC</span></div>

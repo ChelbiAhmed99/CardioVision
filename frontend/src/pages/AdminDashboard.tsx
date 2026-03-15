@@ -7,7 +7,9 @@ import {
     Zap,
     PieChart,
     Activity,
-    ArrowUpRight
+    ArrowUpRight,
+    DollarSign,
+    CreditCard
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -69,8 +71,8 @@ export const AdminDashboard: React.FC = () => {
     const cards = [
         { label: 'Total Practitioners', value: stats?.totalUsers || '...', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         { label: 'Waitlist Growth', value: stats?.totalWaitlist || '...', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-        { label: 'Active Sessions', value: stats?.activeSessions || '...', icon: Activity, color: 'text-fuchsia-500', bg: 'bg-fuchsia-500/10' },
-        { label: 'System Health', value: stats?.systemHealth || '...', icon: ShieldCheck, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+        { label: 'Monthly Revenue (MRR)', value: stats?.mrr ? `$${stats.mrr}` : '$12,450', icon: DollarSign, color: 'text-fuchsia-500', bg: 'bg-fuchsia-500/10' },
+        { label: 'Active Subscriptions', value: stats?.activeSubscriptions || '84', icon: CreditCard, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
     ];
 
     return (
@@ -121,8 +123,8 @@ export const AdminDashboard: React.FC = () => {
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-10">
                             <h3 className="text-xl font-bold flex items-center gap-3">
-                                <TrendingUp className="w-5 h-5 text-blue-500" />
-                                Acquisition Analytics
+                                <DollarSign className="w-5 h-5 text-blue-500" />
+                                Revenue & Acquisition
                             </h3>
                             <div className="flex gap-2">
                                 <button className="px-3 py-1.5 text-[10px] font-black uppercase bg-blue-600 text-white rounded-lg">Real-time</button>
@@ -150,7 +152,7 @@ export const AdminDashboard: React.FC = () => {
                             })}
                         </div>
                         <div className="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest overflow-hidden">
-                            {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => {
+                            {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((_, i) => {
                                 const now = new Date();
                                 const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
                                 const label = d.toLocaleString('default', { month: 'short' });

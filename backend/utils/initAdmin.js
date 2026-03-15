@@ -16,11 +16,17 @@ export async function initAdmin() {
             await user.save();
             console.log('✅ Admin account verified/updated: admin@cardiovision.com');
         } else {
+            const scanResetDate = new Date();
+            scanResetDate.setDate(scanResetDate.getDate() + 30);
+
             await User.create({
                 fullName: 'System Admin',
                 email: 'admin@cardiovision.com',
                 password: hashedPassword,
-                role: 'admin'
+                role: 'admin',
+                plan: 'Enterprise',
+                scanResetDate,
+                scanCount: 0
             });
             console.log('✅ New admin account created: admin@cardiovision.com');
         }

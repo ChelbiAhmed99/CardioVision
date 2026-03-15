@@ -11,7 +11,10 @@ import {
     User as UserIcon,
     Stethoscope,
     Shield,
-    Trash2
+    Trash2,
+    Crown,
+    CreditCard,
+    Zap
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -26,7 +29,8 @@ export const UserManagement: React.FC = () => {
         email: '',
         password: '',
         specialty: 'Cardiologist',
-        role: 'user'
+        role: 'user',
+        plan: 'Basic'
     });
 
     const fetchUsers = async () => {
@@ -72,7 +76,8 @@ export const UserManagement: React.FC = () => {
                 email: user.email,
                 password: '', // Don't show password for editing
                 specialty: user.specialty,
-                role: user.role
+                role: user.role,
+                plan: user.plan || 'Basic'
             });
         } else {
             setEditingUser(null);
@@ -81,7 +86,8 @@ export const UserManagement: React.FC = () => {
                 email: '',
                 password: '',
                 specialty: 'Cardiologist',
-                role: 'user'
+                role: 'user',
+                plan: 'Basic'
             });
         }
         setIsModalOpen(true);
@@ -154,6 +160,7 @@ export const UserManagement: React.FC = () => {
                                 <th className="px-6 sm:px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Practitioner</th>
                                 <th className="px-6 sm:px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Specialty</th>
                                 <th className="px-6 sm:px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Access Level</th>
+                                <th className="px-6 sm:px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Subscription</th>
                                 <th className="px-6 sm:px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -184,6 +191,26 @@ export const UserManagement: React.FC = () => {
                                             ) : (
                                                 <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/10 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10">
                                                     User
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-5">
+                                        <div className="flex items-center gap-2">
+                                            {user.plan === 'Enterprise' ? (
+                                                <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-fuchsia-600 bg-fuchsia-500/10 px-2.5 py-1 rounded-lg border border-fuchsia-500/20">
+                                                    <Crown className="w-3 h-3" />
+                                                    Enterprise
+                                                </span>
+                                            ) : user.plan === 'Professional' ? (
+                                                <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20">
+                                                    <Zap className="w-3 h-3" />
+                                                    Professional
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
+                                                    <CreditCard className="w-3 h-3" />
+                                                    Basic
                                                 </span>
                                             )}
                                         </div>
@@ -326,6 +353,22 @@ export const UserManagement: React.FC = () => {
                                                 <option value="admin">Administrator</option>
                                             </select>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subscription Plan</label>
+                                    <div className="relative">
+                                        <Crown className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <select
+                                            value={formData.plan}
+                                            onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
+                                            className="w-full bg-slate-50 dark:bg-[#040508] border border-slate-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white appearance-none"
+                                        >
+                                            <option value="Basic">Basic ($199/mo)</option>
+                                            <option value="Professional">Professional ($199/mo)</option>
+                                            <option value="Enterprise">Enterprise (Custom)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

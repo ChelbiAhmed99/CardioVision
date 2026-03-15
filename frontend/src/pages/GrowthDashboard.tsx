@@ -3,16 +3,15 @@ import axios from 'axios';
 import {
     Target,
     Zap,
-    Globe,
-    CheckCircle2,
     AlertCircle,
     Info,
     Activity,
     Layers,
-    MessageSquare,
     Shield,
     BrainCircuit,
-    Sparkles
+    Sparkles,
+    DollarSign,
+    TrendingUp
 } from 'lucide-react';
 
 // --- Re-Scaled Custom SVG Analytics ---
@@ -123,10 +122,10 @@ export const GrowthDashboard: React.FC = () => {
     }, []);
 
     const stats = [
-        { label: 'Visiteurs Uniques', value: realStats?.visits || '130', sub: 'Canaux Multiples', icon: Globe, color: 'text-blue-600', bg: 'bg-blue-600/10' },
-        { label: 'Réponses Validées', value: realStats?.count || '58', sub: 'Qualité 100%', icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
-        { label: 'Conversion Rate', value: `${realStats?.conversion_rate || '44.6'}%`, sub: 'Benchmark Pro', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
-        { label: 'Indice d’Intérêt', value: '98%', sub: 'Validation Valeur', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-600/10' },
+        { label: 'Waitlist Total', value: realStats?.count || '58', sub: 'Qualified Leads', icon: Target, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
+        { label: 'Conversion Rate', value: `${realStats?.conversion_rate || '44.6'}%`, sub: 'Benchmark Pro', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
+        { label: 'Current MRR', value: '$12,450', sub: 'Recurring', icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-600/10' },
+        { label: 'Projected LTV', value: '$3,200', sub: 'Per Clinical Client', icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-600/10' },
     ];
 
     const profileData = [

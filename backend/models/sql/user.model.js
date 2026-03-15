@@ -39,6 +39,18 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('user', 'admin'),
         defaultValue: 'user',
     },
+    plan: {
+        type: DataTypes.ENUM('Free', 'Professional', 'Enterprise'),
+        defaultValue: 'Free',
+    },
+    scanCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
+    scanResetDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
 }, {
     timestamps: true,
 });

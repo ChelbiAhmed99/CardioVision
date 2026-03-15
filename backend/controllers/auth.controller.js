@@ -4,7 +4,7 @@ import Settings from "../models/sql/settings.model.js";
 import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
-    let { fullName, email, password } = req.body;
+    let { fullName, email, password, plan } = req.body;
     if (email) email = email.trim().toLowerCase();
     try {
         const settings = await Settings.findOne({ order: [['createdAt', 'DESC']] });
@@ -12,8 +12,8 @@ export const signup = async (req, res) => {
             return res.status(403).json({ message: "Signups are currently disabled by the administrator." });
         }
 
-        if (!fullName || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+        if (!fullName || !email || !password || !plan) {
+            return res.status(400).json({ message: "All fields including subscription plan are required" });
         }
 
         if (password.length < 6) {
@@ -27,10 +27,17 @@ export const signup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Set reset date to 30 days from now
+        const scanResetDate = new Date();
+        scanResetDate.setDate(scanResetDate.getDate() + 30);
+
         const newUser = await User.create({
             fullName,
             email,
             password: hashedPassword,
+            plan: plan || 'Free',
+            scanResetDate,
+            scanCount: 0
         });
 
         if (newUser) {

@@ -37,7 +37,9 @@ export const createUser = async (req, res) => {
             email,
             password: hashedPassword,
             specialty: specialty || "Cardiologist",
-            role: role || 'user'
+            role: role || 'user',
+            plan: req.body.plan || 'Free',
+            scanResetDate: new Date(new Date().setDate(new Date().getDate() + 30))
         });
 
         // Audit Log
@@ -73,7 +75,8 @@ export const updateUser = async (req, res) => {
             fullName: fullName || user.fullName,
             email: email || user.email,
             specialty: specialty || user.specialty,
-            role: role || user.role
+            role: role || user.role,
+            plan: req.body.plan || user.plan
         });
 
         // Audit Log
@@ -205,11 +208,18 @@ export const getAdminStats = async (req, res) => {
             include: [] // If you had relations, you'd include them here
         });
 
+        // Monetization stats (calculated from active plans)
+        const professionalCount = await User.count({ where: { plan: 'Professional' } });
+        const enterpriseCount = await User.count({ where: { plan: 'Enterprise' } });
+        const mrr = (professionalCount * 199) + (enterpriseCount * 1200); // 1200 heuristic for custom
+
         res.status(200).json({
             totalUsers: userCount,
             totalWaitlist: waitlistCount,
-            activeSessions: userCount > 0 ? Math.max(1, Math.floor(userCount * 0.15)) : 0, // 15% heuristic
+            activeSessions: userCount > 0 ? Math.max(1, Math.floor(userCount * 0.15)) : 0,
             systemHealth: "Optimal",
+            monthlyRevenue: mrr,
+            activeSubscriptions: professionalCount + enterpriseCount,
             acquisitionData,
             recentActivity: recentActivity.map(log => ({
                 action: log.action.replace(/_/g, ' '),

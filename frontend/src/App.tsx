@@ -8,10 +8,11 @@ import {
   LogOut,
   Search,
   Bell,
-  Loader
+  Loader,
+  Crown
 } from 'lucide-react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/useAuthStore';
 import { useAnalysisStore } from './store/useAnalysisStore';
 import { useNotificationStore } from './store/useNotificationStore';
@@ -41,9 +42,10 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { UserManagement } from './pages/UserManagement';
 import { SiteSettings } from './pages/SiteSettings';
 import { AuditLogs } from './pages/AuditLogs';
+import PricingPage from './pages/PricingPage';
 
 function HomeContent() {
-  const { authUser, logout } = useAuthStore();
+  const { authUser, logout, checkAuth } = useAuthStore();
   const navigate = useNavigate();
   const { saveToHistory } = useAnalysisStore();
   const { notifications, getNotifications } = useNotificationStore();
@@ -156,7 +158,17 @@ function HomeContent() {
     setIsProcessing(true);
     setAnalysisResults(null);
     try {
-      const response = await fetch('/video-output');
+      const response = await fetch('/api/ai/video-output');
+
+      if (response.status === 403) {
+        const errorData = await response.json();
+        if (errorData.limitReached) {
+          toast.error(errorData.message, { duration: 6000, icon: '🚀' });
+          setSelectedModel('pricing');
+          return;
+        }
+      }
+
       if (!response.ok) throw new Error('Video processing failed');
       const result = await response.json();
 
@@ -181,12 +193,16 @@ function HomeContent() {
             cure: res.cure
           }
         });
+
+        // Update authUser context
+        checkAuth(); // Refresh user data to update scan count
       }
 
       // Reset temp ID after successful analysis
       setTempPatientId('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Processing Error:', error);
+      toast.error(error.message || "Diagnostic failed");
     } finally {
       setTimeout(() => setIsProcessing(false), 1000);
     }
@@ -222,6 +238,8 @@ function HomeContent() {
         );
       case 'profile':
         return <ProfileView />;
+      case 'pricing':
+        return <PricingPage />;
       default:
         return (
           <div className="p-8 lg:p-12 relative animate-fade-in">
@@ -319,6 +337,24 @@ function HomeContent() {
                   className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 dark:text-white"
                 />
               </div>
+
+              {authUser?.plan === 'Free' && (
+                <div className="p-5 rounded-2xl bg-blue-600/5 border border-blue-500/10 relative overflow-hidden group">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Monthly Quota</p>
+                    <span className="text-[10px] font-black text-blue-500">{authUser?.scanCount || 0}/10 Scans</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 transition-all duration-1000"
+                      style={{ width: `${Math.min((authUser?.scanCount || 0) * 10, 100)}%` }}
+                    />
+                  </div>
+                  {(authUser?.scanCount || 0) >= 8 && (
+                    <p className="text-[9px] font-bold text-amber-500 mt-2 animate-pulse">Running low on clinical scans.</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -351,6 +387,14 @@ function HomeContent() {
               >
                 <Shield className={`w-5 h-5 ${selectedModel === 'profile' ? 'text-white' : 'text-slate-400 group-hover:text-blue-500'}`} />
                 <span className="text-xs font-black uppercase tracking-widest">My Profile</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedModel('pricing')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${selectedModel === 'pricing' ? 'bg-blue-600 shadow-lg shadow-blue-600/20 text-white' : 'text-slate-500 hover:bg-emerald-500/10 border border-emerald-500/20'}`}
+              >
+                <Crown className={`w-5 h-5 ${selectedModel === 'pricing' ? 'text-white' : 'text-emerald-500'}`} />
+                <span className="text-xs font-black uppercase tracking-widest">Subscription</span>
               </button>
 
               {authUser?.role === 'admin' && (
@@ -412,7 +456,10 @@ function HomeContent() {
                 {authUser?.fullName?.substring(0, 2).toUpperCase() || 'MD'}
               </div>
               <div className="text-left hidden lg:block">
-                <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{authUser?.fullName || 'Dr. Guest'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{authUser?.fullName || 'Dr. Guest'}</p>
+                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">PRO</span>
+                </div>
                 <p className="text-[10px] text-slate-500 font-bold">Authenticated Professional</p>
               </div>
             </div>
