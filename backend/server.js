@@ -125,17 +125,19 @@ app.use(
     // Determine if this request is about to loop
     try {
       const targetUrl = new URL(FLASK_URL);
-      // Loop check: Only block if it's explicitly localhost on the same port,
-      // or if it matches the current request's hostname and port (direct recursion).
+      // Loop check: Block if target is localhost/127.0.0.1 on the same port,
+      // OR if it matches the current request's hostname and port,
+      // OR if it's one of the common internal aliases for the same service.
       const isExactlySelf = targetUrl.hostname === req.hostname && targetUrl.port == PORT;
-      const isLocalLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1') && targetUrl.port == PORT;
+      const isLocalLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === '0.0.0.0') && targetUrl.port == PORT;
+      const isRailwayInternalCheck = targetUrl.hostname.includes('railway.internal') && targetUrl.port == PORT;
 
-      if (isExactlySelf || isLocalLoop) {
+      if (isExactlySelf || isLocalLoop || isRailwayInternalCheck) {
         console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DENIED:')} ${req.method} ${req.originalUrl} -> ${FLASK_URL}`);
         return res.status(508).json({
           error: "Proxy Loop Detected",
-          message: "The API attempted to call itself. Check FLASK_API_URL in your environment settings.",
-          details: { target: FLASK_URL, service_port: PORT }
+          message: "The API attempted to call itself. Check FLASK_API_URL in your environment settings. It cannot point to the same port as this server.",
+          details: { target: FLASK_URL, service_port: PORT, request_host: req.hostname }
         });
       }
     } catch (e) {
