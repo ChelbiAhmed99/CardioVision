@@ -41,13 +41,15 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-let PORT = process.env.PORT || 3000;
-// Force 3000 if otherwise defaulting to 8080 to avoid conflict with Flask AI Service
-if (PORT == 8080) {
-  console.log(chalk.yellow(`ℹ️ Port 8080 detected. Shifting to 3000 to avoid conflict with internal AI Service.`));
+let PORT = parseInt(process.env.PORT) || 3000;
+
+// FORCED PORT SHIFT: If we are on 8080, we MUST move to 3000 to avoid proxy loops with Flask.
+if (PORT === 8080) {
+  console.log(chalk.bold.red('⚠ PORT CONFLICT DETECTED: Service is trying to use 8080 (reserved for AI).'));
+  console.log(chalk.bold.yellow('🚀 SHIFTING AUTOMATICALLY TO PORT 3000...'));
   PORT = 3000;
 }
-console.log(chalk.dim(`DEBUG: NODE_ENV=${process.env.NODE_ENV}, PORT=${PORT}, FLASK_URL=${process.env.FLASK_API_URL}`));
+console.log(chalk.cyan(`[INFO] Final Server Config: PORT=${PORT}, FLASK_URL=${process.env.FLASK_API_URL}`));
 
 // Health check route
 app.get("/health", (req, res) => {

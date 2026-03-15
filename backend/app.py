@@ -982,6 +982,22 @@ def after_request(response):
     return response
 
 
+@app.route("/health", methods=['GET'])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "service": "CardioVision AI Analysis Engine",
+        "engine": "r2plus1d_18 + deeplabv3_res50"
+    }), 200
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Resource not found", "code": 404}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"error": "Internal server error", "code": 500}), 500
+
 @app.route("/video-output", methods=['GET'])
 def video_output():
     # Check for existing videos in INPUT_FOLDER
@@ -1036,6 +1052,9 @@ def video_output():
         traceback.print_exc()
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
     
+    if not results:
+        return jsonify({"error": "No results generated. Ensure input files are valid Echo sequences."}), 400
+        
     return jsonify(results if len(results) > 1 else results[0])
 
 @app.route('/get-video/mask', methods=['GET'])
