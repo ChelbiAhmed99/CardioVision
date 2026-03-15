@@ -158,6 +158,23 @@ app.use(
       headers['expires'] = '0';
       return headers;
     },
+    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
+      const contentType = proxyRes.headers['content-type'] || '';
+      if (contentType.includes('text/html')) {
+        const bodySnippet = proxyResData.toString('utf8').substring(0, 300);
+        console.error(`${chalk.red('⚠ NON-JSON RESPONSE FROM AI:')} ${userReq.method} ${userReq.originalUrl}`);
+        console.error(`${chalk.dim('Snippet:')} ${bodySnippet}`);
+
+        // If it's HTML but we expected JSON, return a 502 with the snippet
+        userRes.status(502);
+        return JSON.stringify({
+          error: "AI Backend returned HTML instead of JSON",
+          snippet: bodySnippet,
+          target: FLASK_URL
+        });
+      }
+      return proxyResData;
+    },
     proxyErrorHandler: (err, res, next) => {
       console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
 

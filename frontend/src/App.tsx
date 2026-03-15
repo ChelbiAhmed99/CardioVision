@@ -185,7 +185,14 @@ function HomeContent() {
         throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        console.error('Failed to parse JSON response. Raw content:', text.substring(0, 500));
+        throw new Error('Server returned invalid data format. Please check logs.');
+      }
 
       const resultsArray = Array.isArray(result) ? result : [result];
       setAnalysisResults(resultsArray);
