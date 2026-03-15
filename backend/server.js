@@ -96,21 +96,33 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "CardioVision API running" });
 });
 
+// AI Service Target configuration
+const FLASK_URL = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
+
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  proxy(process.env.FLASK_API_URL || "http://127.0.0.1:8080", {
+  proxy(FLASK_URL, {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
     proxyErrorHandler: (err, res, next) => {
-      console.error(`❌ Proxy Error to Flask: ${err.code} - ${err.message}`);
+      console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
+
+      let hint = "Ensure the AI service is running and FLASK_API_URL is correct.";
+      if (err.code === 'ENOTFOUND') {
+        hint = `Hostname "${err.hostname}" could not be resolved. In Railway, check that the service name is 'flask-ai' or update FLASK_API_URL.`;
+      } else if (err.code === 'ECONNREFUSED') {
+        hint = `Connection refused at ${FLASK_URL}. Is the Flask app listening on the correct port?`;
+      }
+
       res.status(502).json({
-        error: "AI Backend unreachable",
-        details: err.code,
-        target: process.env.FLASK_API_URL
+        error: "AI Backend Unreachable",
+        hint: hint,
+        code: err.code,
+        target: FLASK_URL
       });
     },
     parseReqBody: false,
-    timeout: 30000, // 30s timeout
+    timeout: 60000, // Increased to 60s for heavy AI tasks
   })
 );
 
