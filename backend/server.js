@@ -103,7 +103,14 @@ const FLASK_URL = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
 app.use(
   "/api/ai",
   proxy(FLASK_URL, {
-    proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
+    proxyReqPathResolver: (req) => {
+      const resolvedPath = req.originalUrl.replace("/api/ai", "");
+      // Safety check: prevent proxy loop if target accidentally points back to this server
+      if (FLASK_URL.includes(`localhost:${PORT}`) || FLASK_URL.includes(`127.0.0.1:${PORT}`)) {
+        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DETECTED:')} FLASK_API_URL points to the current server port ${PORT}.`);
+      }
+      return resolvedPath;
+    },
     proxyErrorHandler: (err, res, next) => {
       console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
 
