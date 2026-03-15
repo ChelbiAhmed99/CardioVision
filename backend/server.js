@@ -118,34 +118,28 @@ app.get("/health", (req, res) => {
 // AI Service Target configuration
 const FLASK_URL = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
 
+// Global Loop Protection: catch requests that have already been proxied by this server
+app.use((req, res, next) => {
+  if (req.headers['x-cardiovision-loop-protection']) {
+    console.error(`${chalk.red('⚠ CRITICAL INFINITE LOOP DETECTED!')} ${req.method} ${req.originalUrl}`);
+    return res.status(508).json({
+      error: "Infinite Proxy Loop Detected",
+      message: "The server received a request that it already proxied once. Check your FLASK_API_URL and service names in Railway.",
+      details: { url: req.originalUrl, target: FLASK_URL }
+    });
+  }
+  next();
+});
+
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  (req, res, next) => {
-    // Determine if this request is about to loop
-    try {
-      const targetUrl = new URL(FLASK_URL);
-      // Loop check: Only block if it's explicitly localhost on the same port,
-      // OR if the target hostname matches the current request's hostname exactly on the same port.
-      const isExactlySelf = targetUrl.hostname === req.hostname && targetUrl.port == PORT;
-      const isLocalLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === '0.0.0.0') && targetUrl.port == PORT;
-
-      if (isExactlySelf || isLocalLoop) {
-        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DENIED:')} ${req.method} ${req.originalUrl} -> ${FLASK_URL}`);
-        return res.status(508).json({
-          error: "Proxy Loop Detected",
-          message: "The API attempted to call itself. Check FLASK_API_URL settings.",
-          details: { target: FLASK_URL, service_port: PORT, request_host: req.hostname }
-        });
-      }
-    } catch (e) {
-      console.warn("⚠ Proxy Loop Check failed (invalid URL):", e.message);
-    }
-    next();
-  },
   proxy(FLASK_URL, {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      // Add loop protection header
+      proxyReqOpts.headers['x-cardiovision-loop-protection'] = 'true';
+
       // Stripping cache headers to prevent 304 responses from AI backend
       delete proxyReqOpts.headers['if-none-match'];
       delete proxyReqOpts.headers['if-modified-since'];

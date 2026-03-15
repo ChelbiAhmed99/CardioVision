@@ -982,6 +982,19 @@ def after_request(response):
     return response
 
 
+@app.before_request
+def log_request_info():
+    logger.info(f"Incoming Request: {request.method} {request.path} from {request.remote_addr}")
+    logger.info(f"Headers: {dict(request.headers)}")
+
+@app.route("/api/ping", methods=['GET'])
+def ping():
+    return jsonify({
+        "status": "online",
+        "service": "AI Engine",
+        "timestamp": os.popen('date').read().strip()
+    }), 200
+
 @app.route("/health", methods=['GET'])
 def health_check():
     return jsonify({
