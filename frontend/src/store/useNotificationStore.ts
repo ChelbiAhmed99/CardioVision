@@ -29,7 +29,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     getNotifications: async () => {
         set({ isFetching: true });
         try {
-            const res = await axios.get(`${API_URL}`);
+            const res = await axios.get(`${API_URL}/all`);
             set({ notifications: res.data });
         } catch (error) {
             console.log("Error in getNotifications:", error);
