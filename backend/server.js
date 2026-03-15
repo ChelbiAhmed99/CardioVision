@@ -160,17 +160,21 @@ app.use(
     },
     userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
       const contentType = proxyRes.headers['content-type'] || '';
-      if (contentType.includes('text/html')) {
-        const bodySnippet = proxyResData.toString('utf8').substring(0, 300);
-        console.error(`${chalk.red('⚠ NON-JSON RESPONSE FROM AI:')} ${userReq.method} ${userReq.originalUrl}`);
-        console.error(`${chalk.dim('Snippet:')} ${bodySnippet}`);
+      const bodyString = proxyResData.toString('utf8');
+      const isHtml = contentType.includes('text/html') || bodyString.trim().startsWith('<!doctype') || bodyString.trim().startsWith('<html');
 
-        // If it's HTML but we expected JSON, return a 502 with the snippet
-        userRes.status(502);
+      if (isHtml) {
+        const bodySnippet = bodyString.substring(0, 500);
+        console.error(`${chalk.red('⚠ HTML INTERCEPTED IN PROXY:')} ${userReq.method} ${userReq.originalUrl} (Status: ${proxyRes.statusCode})`);
+        console.error(`${chalk.dim('Snippet:')} ${bodySnippet.replace(/\n/g, ' ')}`);
+
+        // Force JSON error to keep frontend stable
+        userRes.status(proxyRes.statusCode >= 400 ? proxyRes.statusCode : 502);
         return JSON.stringify({
-          error: "AI Backend returned HTML instead of JSON",
-          snippet: bodySnippet,
-          target: FLASK_URL
+          error: "Downstream service returned HTML",
+          status: proxyRes.statusCode,
+          target: FLASK_URL,
+          snippet: bodySnippet
         });
       }
       return proxyResData;

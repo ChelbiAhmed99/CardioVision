@@ -162,12 +162,19 @@ function HomeContent() {
         cache: 'no-store',
       });
 
-      if (response.status === 403) {
-        const errorData = await response.json();
-        if (errorData.limitReached) {
-          toast.error(errorData.message, { duration: 6000, icon: '🚀' });
-          setSelectedModel('pricing');
-          return;
+      if (response.status === 403 || response.status === 401) {
+        const text = await response.text();
+        try {
+          const errorData = JSON.parse(text);
+          if (errorData.limitReached) {
+            toast.error(errorData.message, { duration: 6000, icon: '🚀' });
+            setSelectedModel('pricing');
+            return;
+          }
+          throw new Error(errorData.message || errorData.error || `Error ${response.status}`);
+        } catch (e) {
+          console.error(`Auth/Limit Error (${response.status}) - Non-JSON body:`, text.substring(0, 500));
+          throw new Error(`Authentication or Limit Error: ${response.status}`);
         }
       }
 
@@ -185,13 +192,19 @@ function HomeContent() {
         throw new Error(errorMessage);
       }
 
+      const responseText = await response.text();
       let result;
       try {
-        result = await response.json();
+        result = JSON.parse(responseText);
       } catch (jsonError) {
-        const text = await response.text();
-        console.error('Failed to parse JSON response. Raw content:', text.substring(0, 500));
-        throw new Error('Server returned invalid data format. Please check logs.');
+        console.error('CRITICAL: Failed to parse AI Response JSON.');
+        console.error('Status:', response.status);
+        console.error('Raw Body Content:', responseText.substring(0, 1000));
+
+        // Expose to window for user to copy easily
+        (window as any).CardioVision_Last_Error_Body = responseText;
+
+        throw new Error(`Diagnostic Engine returned invalid data (HTML instead of JSON). Status: ${response.status}`);
       }
 
       const resultsArray = Array.isArray(result) ? result : [result];
