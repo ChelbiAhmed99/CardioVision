@@ -169,7 +169,20 @@ function HomeContent() {
         }
       }
 
-      if (!response.ok) throw new Error('Video processing failed');
+      if (!response.ok) {
+        let errorMessage = 'Video processing failed';
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON error response:', text.substring(0, 200));
+          errorMessage = `Server Error (${response.status}): Unexpected response format.`;
+        }
+        throw new Error(errorMessage);
+      }
+
       const result = await response.json();
 
       const resultsArray = Array.isArray(result) ? result : [result];
