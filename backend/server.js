@@ -145,6 +145,19 @@ app.use(
   },
   proxy(FLASK_URL, {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      // Stripping cache headers to prevent 304 responses from AI backend
+      delete proxyReqOpts.headers['if-none-match'];
+      delete proxyReqOpts.headers['if-modified-since'];
+      return proxyReqOpts;
+    },
+    userResHeaderDecorator: (headers, userReq, userRes, proxyReq, proxyRes) => {
+      // Enforce no caching for AI responses
+      headers['cache-control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
+      headers['pragma'] = 'no-cache';
+      headers['expires'] = '0';
+      return headers;
+    },
     proxyErrorHandler: (err, res, next) => {
       console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
 

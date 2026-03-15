@@ -1055,7 +1055,10 @@ def video_output():
     if not results:
         return jsonify({"error": "No results generated. Ensure input files are valid Echo sequences."}), 400
         
-    return jsonify(results if len(results) > 1 else results[0])
+    response = jsonify(results if len(results) > 1 else results[0])
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 @app.route('/get-video/mask', methods=['GET'])
 def get_video_mask():

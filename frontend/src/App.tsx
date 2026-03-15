@@ -158,7 +158,9 @@ function HomeContent() {
     setIsProcessing(true);
     setAnalysisResults(null);
     try {
-      const response = await fetch('/api/ai/video-output');
+      const response = await fetch(`/api/ai/video-output?t=${Date.now()}`, {
+        cache: 'no-store',
+      });
 
       if (response.status === 403) {
         const errorData = await response.json();
