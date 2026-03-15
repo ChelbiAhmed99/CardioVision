@@ -43,13 +43,23 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 let PORT = parseInt(process.env.PORT) || 3000;
 
-// FORCED PORT SHIFT: If we are on 8080, we MUST move to 3000 to avoid proxy loops with Flask.
-if (PORT === 8080) {
-  console.log(chalk.bold.red('⚠ PORT CONFLICT DETECTED: Service is trying to use 8080 (reserved for AI).'));
-  console.log(chalk.bold.yellow('🚀 SHIFTING AUTOMATICALLY TO PORT 3000...'));
-  PORT = 3000;
+// Intelligent Port Management:
+// Only shift if we detect a conflict on localhost/127.0.0.1
+const FLASK_URL_FOR_CHECK = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
+try {
+  const targetUrl = new URL(FLASK_URL_FOR_CHECK);
+  const isFlaskOnLocalhost = targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1';
+
+  if (isFlaskOnLocalhost && targetUrl.port == PORT) {
+    console.log(chalk.bold.yellow(`🚀 LOCALHOST CONFLICT DETECTED: AI and Backend both on port ${PORT}.`));
+    console.log(chalk.bold.yellow('   Shifting Backend to Port 3001 to resolve local collision.'));
+    PORT = PORT == 8080 ? 3000 : PORT + 1; // Try 3000 first, then next port
+  }
+} catch (e) {
+  // Invalid URL in env, proceed with defaults
 }
-console.log(chalk.cyan(`[INFO] Final Server Config: PORT=${PORT}, FLASK_URL=${process.env.FLASK_API_URL}`));
+
+console.log(chalk.cyan(`[INFO] Server starting: PORT=${PORT}, NODE_ENV=${process.env.NODE_ENV || 'development'}`));
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -60,11 +70,12 @@ app.get("/health", (req, res) => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 const printBanner = () => {
+  const isProd = process.env.NODE_ENV === 'production';
   console.log(chalk.cyan(`
     ┌─────────────────────────────────────────────────────────┐
     │                                                         │
     │    ${chalk.bold.white('CardioVision API Service')}                       │
-    │    ${chalk.dim('Local Development Mode')}                             │
+    │    ${isProd ? chalk.bold.green('🌐 Production Mode') : chalk.dim('🛠️  Local Development')}                      │
     │                                                         │
     │    ${chalk.green('🚀 Backend:')}   ${chalk.underline('http://localhost:' + PORT)}             │
     │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || 'http://localhost:8080')}     │
