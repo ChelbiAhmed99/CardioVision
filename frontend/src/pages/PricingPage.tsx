@@ -4,49 +4,48 @@ import { Check, Shield, Zap, Activity, Crown, ArrowRight } from 'lucide-react';
 const PricingPage: React.FC = () => {
   const tiers = [
     {
-      name: "Freemium",
-      price: "0",
-      description: "Ideal for individual clinicians and students.",
+      name: "Solidarity Plan",
+      price: "70",
+      description: "Essential access for rural clinics and underserved healthcare regions.",
       icon: Activity,
       features: [
-        "10 Free Scans / month",
-        "Automated Ejection Fraction (EF)",
-        "Standard Segment Analysis",
+        "Core LVEF Analysis",
+        "Essential Clinical Reports",
+        "Simplified Interface",
         "Community Support",
-        "Local History Storage"
+        "Health Equity Subsidy"
       ],
-      cta: "Get Started Free",
-      accent: "slate"
+      cta: "Join Solidarity",
+      accent: "emerald"
     },
     {
-      name: "Professional",
+      name: "Liberal Pack",
       price: "199",
-      description: "Advanced diagnostics for busy clinical centers.",
+      description: "Professional diagnostics for private practices and cardiologists.",
       icon: Zap,
       features: [
-        "Unlimited clinical scans",
-        "Everything in Freemium",
-        "Global Longitudinal Strain (GLS)",
-        "Automated Bull's-eye Mapping",
-        "Batch Processing",
-        "Priority Support"
+        "Automatic LVEF & GLS",
+        "Instant Clinical Reports",
+        "Standard Segment Analysis",
+        "Priority Email Support",
+        "Practice Branding"
       ],
       popular: true,
-      cta: "Go Professional",
+      cta: "Go Liberal",
       accent: "blue"
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      description: "The complete solution for hospitals and institutions.",
+      name: "Center Pack",
+      price: "499",
+      description: "Advanced solution for imaging centers and clinical teams.",
       icon: Crown,
       features: [
-        "Everything in Professional",
-        "PACS / DICOM Gateway",
-        "Clinical Integration API",
+        "Advanced Analysis (Regional Strain)",
+        "Multi-User Team Access",
+        "Patient History Management",
         "Dedicated Support",
-        "On-site Implementation",
-        "Fleet Management"
+        "Bulls-eye Mapping",
+        "PACS Integration API"
       ],
       cta: "Contact Sales",
       accent: "fuchsia"
@@ -110,8 +109,8 @@ const PricingPage: React.FC = () => {
               </div>
 
               <button className={`w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${tier.popular
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:scale-[1.02]'
-                  : 'bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:scale-[1.02]'
+                : 'bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10'
                 }`}>
                 {tier.cta}
                 <ArrowRight className="w-4 h-4" />

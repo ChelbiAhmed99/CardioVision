@@ -18,9 +18,9 @@ export const LandingPage: React.FC = () => {
   });
 
   const tiers = [
-    { name: "Basic", price: "199", icon: Activity },
-    { name: "Professional", price: "199", icon: Zap, popular: true },
-    { name: "Enterprise", price: "Custom", icon: Crown }
+    { name: "Solidarity", price: "70", icon: Activity },
+    { name: "Liberal", price: "199", icon: Zap, popular: true },
+    { name: "Center", price: "499", icon: Crown }
   ];
 
   React.useEffect(() => {

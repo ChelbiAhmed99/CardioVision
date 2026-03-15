@@ -72,11 +72,18 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:3000"].filter(Boolean);
+      const allowedOrigins = [
+        process.env.CLIENT_URL,
+        "http://localhost:5173",
+        "http://localhost:3000"
+      ].filter(Boolean);
+
+      // Allow requests with no origin (like mobile apps or curl) or matching allowed origins
       if (!origin || allowedOrigins.some(ao => origin.startsWith(ao))) {
         callback(null, true);
       } else {
-        callback(null, true); // Allow all in dev, but process.env.CLIENT_URL is primary
+        console.warn(`⚠️ Blocked CORS request from: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE"],

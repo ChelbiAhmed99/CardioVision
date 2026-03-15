@@ -16,28 +16,28 @@ export function SignupPage() {
 
     const tiers = [
         {
-            id: 'Free',
-            name: "Freemium",
-            price: "0",
+            id: 'Solidarity',
+            name: "Solidarity Plan",
+            price: "70",
             icon: Activity,
-            features: ["10 scans / month", "Standard EF", "Basic Support"],
-            color: "slate"
+            features: ["Core LVEF Analysis", "Health Equity Subsidy", "Basic Support"],
+            color: "emerald"
         },
         {
-            id: 'Professional',
-            name: "Professional",
+            id: 'Liberal',
+            name: "Liberal Pack",
             price: "199",
             icon: Zap,
             popular: true,
-            features: ["Unlimited scans", "Full GLS Analysis", "Priority Support", "Email Reports"],
+            features: ["Automatic LVEF & GLS", "Clinical Reports", "Priority Support"],
             color: "blue"
         },
         {
-            id: 'Enterprise',
-            name: "Enterprise",
-            price: "Custom",
+            id: 'Center',
+            name: "Center Pack",
+            price: "499",
             icon: Crown,
-            features: ["PACS Gateway", "Clinical Integration", "Dedicated Support", "Fleet Management"],
+            features: ["Regional Strain", "Team Access", "PACS Integration API"],
             color: "fuchsia"
         }
     ];

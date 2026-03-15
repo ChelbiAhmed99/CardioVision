@@ -122,10 +122,10 @@ export const GrowthDashboard: React.FC = () => {
     }, []);
 
     const stats = [
-        { label: 'Waitlist Total', value: realStats?.count || '58', sub: 'Qualified Leads', icon: Target, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
-        { label: 'Conversion Rate', value: `${realStats?.conversion_rate || '44.6'}%`, sub: 'Benchmark Pro', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
-        { label: 'Current MRR', value: '$12,450', sub: 'Recurring', icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-600/10' },
-        { label: 'Projected LTV', value: '$3,200', sub: 'Per Clinical Client', icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-600/10' },
+        { label: 'Waitlist Total', value: realStats?.count || '84', sub: 'Qualified Leads', icon: Target, color: 'text-indigo-600', bg: 'bg-indigo-600/10' },
+        { label: 'Conversion Rate', value: `${realStats?.conversion_rate || '48.2'}%`, sub: 'Benchmark Pro', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
+        { label: 'Current MRR', value: '€18,650', sub: 'Recurring Revenue', icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-600/10' },
+        { label: 'Projected LTV', value: '€5,400', sub: 'Per Clinical Client', icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-600/10' },
     ];
 
     const profileData = [
