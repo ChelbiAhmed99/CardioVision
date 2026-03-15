@@ -31,4 +31,4 @@ RUN mkdir -p backend/uploads backend/input backend/output
 EXPOSE 3000
 
 # Start the server
-CMD ["npm", "run", "server"]
+CMD ["node", "backend/server.js"]

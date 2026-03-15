@@ -125,9 +125,12 @@ app.use(
     // Determine if this request is about to loop
     try {
       const targetUrl = new URL(FLASK_URL);
-      const isLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname.includes('railway') || targetUrl.hostname === req.hostname) && targetUrl.port == PORT;
+      // Loop check: Only block if it's explicitly localhost on the same port,
+      // or if it matches the current request's hostname and port (direct recursion).
+      const isExactlySelf = targetUrl.hostname === req.hostname && targetUrl.port == PORT;
+      const isLocalLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1') && targetUrl.port == PORT;
 
-      if (isLoop) {
+      if (isExactlySelf || isLocalLoop) {
         console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DENIED:')} ${req.method} ${req.originalUrl} -> ${FLASK_URL}`);
         return res.status(508).json({
           error: "Proxy Loop Detected",
@@ -135,7 +138,9 @@ app.use(
           details: { target: FLASK_URL, service_port: PORT }
         });
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn("⚠ Proxy Loop Check failed (invalid URL):", e.message);
+    }
     next();
   },
   proxy(FLASK_URL, {
