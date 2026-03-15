@@ -146,9 +146,23 @@ app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 const frontendPath = path.resolve(__dirname, "../frontend/dist");
 app.use(express.static(frontendPath));
 
+// 404 handler for API routes (prevent falling through to SPA fallback)
+app.use("/api/*", (req, res) => {
+  console.warn(`${chalk.yellow('⚠️ 404 Not Found (API):')} ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    error: "API Route Not Found",
+    path: req.originalUrl
+  });
+});
+
 // SPA fallback route
 app.get("*", (req, res) => {
-  if (req.originalUrl.startsWith("/api")) return;
+  // If it's an API request that reached here, something is wrong
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(404).json({ error: "API Route Not Found (Internal Fallback)" });
+  }
+
+  console.log(`${chalk.dim('ℹ️ SPA Fallback:')} serving index.html for ${req.originalUrl}`);
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
