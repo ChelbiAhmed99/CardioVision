@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
 
 // Validate JWT_SECRET
 if (!process.env.JWT_SECRET) {
@@ -41,7 +41,12 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 3000;
+// Force 3000 in development if otherwise defaulting to 8080 (conflict with Flask)
+if (process.env.NODE_ENV !== 'production' && PORT == 8080) {
+  console.log(chalk.yellow('ℹ️ Port 8080 detected in development. Shifting to 3000 to avoid conflict with AI Service.'));
+  PORT = 3000;
+}
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -105,9 +110,10 @@ app.use(
   proxy(FLASK_URL, {
     proxyReqPathResolver: (req) => {
       const resolvedPath = req.originalUrl.replace("/api/ai", "");
-      // Safety check: prevent proxy loop if target accidentally points back to this server
-      if (FLASK_URL.includes(`localhost:${PORT}`) || FLASK_URL.includes(`127.0.0.1:${PORT}`)) {
-        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DETECTED:')} FLASK_API_URL points to the current server port ${PORT}.`);
+      // Safety check: prevent proxy loop if target accidentally points back to this server or the same port
+      const targetUrl = new URL(FLASK_URL);
+      if ((targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname.includes('railway.internal')) && targetUrl.port == PORT) {
+        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DETECTED:')} FLASK_API_URL (${FLASK_URL}) appears to point to the current server port ${PORT}.`);
       }
       return resolvedPath;
     },
