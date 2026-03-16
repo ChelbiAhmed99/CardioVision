@@ -8,9 +8,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
-      - FLASK_API_URL=http://ai:8080
+      - FLASK_API_URL=https://ai.railway.internal:8080
     depends_on:
       - ai
 

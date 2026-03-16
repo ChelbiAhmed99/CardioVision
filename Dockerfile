@@ -8,15 +8,13 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Final Backend Image
-FROM node:20-slim
+FROM node:20
 WORKDIR /app
 
-# Install native dependencies for better-sqlite3
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-
 # Copy root package.json and install backend dependencies
+# Build from source to ensure compatibility with the container's glibc version
 COPY package*.json ./
-RUN npm install --production
+RUN npm install --production --build-from-source=sqlite3,better-sqlite3
 
 # Copy backend source
 COPY backend/ ./backend/
