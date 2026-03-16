@@ -59,12 +59,8 @@ try {
   // Invalid URL in env, proceed with defaults
 }
 
-console.log(chalk.cyan(`[INFO] Server starting: PORT=${PORT}, NODE_ENV=${process.env.NODE_ENV || 'development'}`));
-
-// Health check route
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "CardioVision API running" });
-});
+const isProd = process.env.NODE_ENV === 'production';
+console.log(chalk.cyan(`[INFO] Server starting: PORT=${PORT}, NODE_ENV=${isProd ? 'production' : 'development'}`));
 
 // Professional logging
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
@@ -113,9 +109,9 @@ app.use(
   })
 );
 
-// Health check route
+// Health check route (used by Railway/Up)
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "CardioVision API running" });
+  res.status(200).json({ status: "CardioVision API running", port: PORT, env: process.env.NODE_ENV });
 });
 
 // AI Service Target configuration
@@ -244,6 +240,18 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(chalk.red('❌ UNHANDLED SERVER ERROR:'));
+  console.error(chalk.red(err.stack));
+
+  res.status(500).json({
+    error: "Internal Server Error",
+    message: isProd ? "An unexpected error occurred. Please check server logs." : err.message,
+    path: req.originalUrl
+  });
+});
+
 // Start server with proper port & binding
 const startServer = async () => {
   try {
@@ -254,7 +262,7 @@ const startServer = async () => {
       console.log(chalk.green(`✓ Server is listening and ready`));
     });
   } catch (error) {
-    console.error("❌ Database connection failed:", error);
+    console.error("❌ Startup failed:", error);
     process.exit(1); // Exit container if DB fails
   }
 };
