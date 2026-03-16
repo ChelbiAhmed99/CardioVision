@@ -1,5 +1,8 @@
 # CardioVision: AI-Powered Echocardiography Analysis
 
+**[🚀 Live Demo](https://cardiovision-production-86b8.up.railway.app/)**
+
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -94,6 +97,13 @@ CardioVision/
 ├── imgs/                  # Project media and screenshots
 └── cardiovision.sqlite    # Local SQLite database
 ```
+
+---
+
+## Demo & Resources
+
+- **[🎥 Watch Demo Video](demo.mp4)**: A comprehensive walkthrough of the CardioVision platform.
+- **[📄 Business Strategy & Roadmap](CardioVision%20Money%20and%20strategy.pdf)**: Detailed insights into our market strategy and financial outlook.
 
 ---
 
