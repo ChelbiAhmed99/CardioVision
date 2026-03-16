@@ -109,7 +109,7 @@ app.use(
   })
 );
 
-// Health check route (used by Railway/Up)
+// Health check route
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "CardioVision API running", port: PORT, env: process.env.NODE_ENV });
 });
@@ -183,7 +183,7 @@ app.use(
 
       let hint = "Ensure the AI service is running and FLASK_API_URL is correct.";
       if (err.code === 'ENOTFOUND') {
-        hint = `Hostname "${err.hostname}" could not be resolved. In Railway, check that the service name is 'flask-ai' or update FLASK_API_URL.`;
+        hint = `Hostname "${err.hostname}" could not be resolved. Check your FLASK_API_URL setting.`;
       } else if (err.code === 'ECONNREFUSED') {
         hint = `Connection refused at ${FLASK_URL}. Is the Flask app listening on the correct port?`;
       }
