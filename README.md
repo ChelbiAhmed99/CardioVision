@@ -41,7 +41,7 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 -   **Data Processing**: NumPy, Pandas
 
 
-## Getting StartedI confirm that I want to delete the project reliable-energy
+## Getting Started
 
 ### Prerequisites
 -   [Docker](https://www.docker.com/get-started)
@@ -67,7 +67,7 @@ The easiest way to run CardioVision is using Docker Compose:
     docker-compose up --build
     ```
 
-The application will be available at your custom Netlify URL.
+The application will be available at your custom Vercel URL.
 
 ---
 
