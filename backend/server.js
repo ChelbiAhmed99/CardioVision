@@ -77,8 +77,8 @@ const printBanner = () => {
     │    ${chalk.bold.white('CardioVision API Service')}                       │
     │    ${isProd ? chalk.bold.green('🌐 Production Mode') : chalk.dim('🛠️  Local Development')}                      │
     │                                                         │
-    │    ${chalk.green('🚀 Backend:')}   ${chalk.underline('http://localhost:' + PORT)}             │
-    │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || 'http://localhost:8080')}     │
+    │    ${chalk.green('🚀 Backend:')}   ${chalk.underline(`${isProd ? process.env.CLIENT_URL : 'http://localhost'}:${PORT}`)}             │
+    │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || (isProd ? 'N/A' : 'http://localhost:8080'))}     │
     │                                                         │
     └─────────────────────────────────────────────────────────┘
     `));
@@ -93,9 +93,12 @@ app.use(
     origin: (origin, callback) => {
       const allowedOrigins = [
         process.env.CLIENT_URL,
-        "http://localhost:5173",
-        "http://localhost:3000"
       ].filter(Boolean);
+
+      if (!isProd) {
+        allowedOrigins.push("http://localhost:5173");
+        allowedOrigins.push("http://localhost:3000");
+      }
 
       // Allow requests with no origin (like mobile apps or curl) or matching allowed origins
       if (!origin || allowedOrigins.some(ao => origin.startsWith(ao))) {

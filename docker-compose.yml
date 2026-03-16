@@ -6,8 +6,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_PROXY_TARGET=http://express-backend:3000
-      - VITE_FLASK_TARGET=http://flask-ai:8080
+      - NODE_ENV=development
     volumes:
       - ./frontend:/app/frontend
       - /app/frontend/node_modules
@@ -22,11 +21,11 @@ services:
       - "3000:3000"
     command: npm run server
     environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - FLASK_API_URL=http://flask-ai:8080
-      - JWT_SECRET=test001234
-      - CLIENT_URL=http://localhost:5173
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3000}
+      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai:8080}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
     volumes:
       - .:/app
       - /app/node_modules
