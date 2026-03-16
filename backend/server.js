@@ -133,31 +133,20 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Export app for Vercel
-export default app;
+// Start server with proper port & binding
+const startServer = async () => {
+  try {
+    await connectToSQLite(); // Ensure DB connection before listening
+    await initAdmin(); // Auto-initialize admin account
+    app.listen(PORT, "0.0.0.0", () => {
+      printBanner();
+      console.log(chalk.green(`✓ Server is listening and ready`));
+    });
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    process.exit(1); // Exit container if DB fails
+  }
+};
 
-// Start server with proper port & binding (only if not on Vercel)
-const isVercel = process.env.VERCEL === "1";
-if (!isVercel) {
-  const startServer = async () => {
-    try {
-      await connectToSQLite(); // Ensure DB connection before listening
-      await initAdmin(); // Auto-initialize admin account
-      app.listen(PORT, "0.0.0.0", () => {
-        printBanner();
-        console.log(chalk.green(`✓ Server is listening and ready`));
-      });
-    } catch (error) {
-      console.error("❌ Database connection failed:", error);
-      process.exit(1); // Exit container if DB fails
-    }
-  };
-  startServer();
-} else {
-  // In Vercel, we still need to initialize the DB if using SQLite (though not ideal)
-  // or rely on the serverless function cold start to do it.
-  // However, serverless functions are stateless, so this is just for minimal compatibility.
-  connectToSQLite().catch(console.error);
-  initAdmin().catch(console.error);
-}
+startServer();
 
