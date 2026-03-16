@@ -1,0 +1,24 @@
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.db
+.sqlite
+*.avi
+*.mp4
+*.gif
+input/
+output/
+uploads/
+temp_input_*/
+models/*.pt
+!models/r2plus1d_18_32_2_pretrained.pt
+!models/deeplabv3_resnet50_random.pt
+# Keep models if they are small, but here they are large.
+# However, if we want them in the image, we should NOT ignore them.
+# But usually we download them or mount them.
+# For now, let's allow them if they exist but ignore large media.
+*.mp4
+*.avi
+*.gif
