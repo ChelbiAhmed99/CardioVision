@@ -8,13 +8,21 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Final Backend Image
-FROM node:20
+FROM node:20-bookworm
 WORKDIR /app
 
+# Install build dependencies required for native modules (sqlite3)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy root package.json and install backend dependencies
-# Build from source to ensure compatibility with the container's glibc version
+# --build-from-source forces compilation against this container's GLIBC
 COPY package*.json ./
-RUN npm install --production --build-from-source=sqlite3,better-sqlite3
+RUN npm install --production --build-from-source=sqlite3
 
 # Copy backend source
 COPY backend/ ./backend/
