@@ -16,8 +16,8 @@ export const connectToSQLite = async () => {
         await sequelize.authenticate();
         console.log('Successfully connected to SQLite database.');
 
-        await sequelize.sync({ alter: true });
-        console.log('Database tables synchronized (alter: true).');
+        await sequelize.sync();
+        console.log('Database tables synchronized.');
     } catch (error) {
         console.error('Unable to connect to the SQLite database:', error);
     }

@@ -36,7 +36,8 @@ def print_ai_banner(port):
     print("    │                                                         │")
     print(f"    │    {BOLD}{WHITE}CardioVision AI Analysis Engine{RESET}{CYAN}             │")
     print(f"    │    {DIM}Internal Neural Network Service{RESET}{CYAN}              │")
-    print(f"    │    {GREEN}🚀 AI Service:{RESET} {WHITE}Port {port}{RESET}{CYAN}                      │")
+    print("    │                                                         │")
+    print(f"    │    {GREEN}🚀 AI Service:{RESET} {WHITE}http://localhost:{port}{RESET}{CYAN}            │")
     print(f"    │    {BLUE}🧠 Models:{RESET}     {DIM}r2plus1d_18, deeplabv3_res50{RESET}{CYAN}      │")
     print("    │                                                         │")
     print("    └─────────────────────────────────────────────────────────┘")
@@ -981,35 +982,6 @@ def after_request(response):
     return response
 
 
-@app.before_request
-def log_request_info():
-    logger.info(f"Incoming Request: {request.method} {request.path} from {request.remote_addr}")
-    logger.info(f"Headers: {dict(request.headers)}")
-
-@app.route("/api/ping", methods=['GET'])
-def ping():
-    return jsonify({
-        "status": "online",
-        "service": "AI Engine",
-        "timestamp": os.popen('date').read().strip()
-    }), 200
-
-@app.route("/health", methods=['GET'])
-def health_check():
-    return jsonify({
-        "status": "healthy",
-        "service": "CardioVision AI Analysis Engine",
-        "engine": "r2plus1d_18 + deeplabv3_res50"
-    }), 200
-
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({"error": "Resource not found", "code": 404}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({"error": "Internal server error", "code": 500}), 500
-
 @app.route("/video-output", methods=['GET'])
 def video_output():
     # Check for existing videos in INPUT_FOLDER
@@ -1064,13 +1036,7 @@ def video_output():
         traceback.print_exc()
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
     
-    if not results:
-        return jsonify({"error": "No results generated. Ensure input files are valid Echo sequences."}), 400
-        
-    response = jsonify(results if len(results) > 1 else results[0])
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    return response
+    return jsonify(results if len(results) > 1 else results[0])
 
 @app.route('/get-video/mask', methods=['GET'])
 def get_video_mask():

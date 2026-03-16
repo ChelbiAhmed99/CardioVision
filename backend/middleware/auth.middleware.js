@@ -20,8 +20,7 @@ export const protectRoute = async (req, res, next) => {
         });
 
         if (!user) {
-            res.cookie("jwt", "", { maxAge: 0 }); // Clear stale session
-            return res.status(401).json({ message: "Session expired or user not found. Please log in again." });
+            return res.status(404).json({ message: "User not found" });
         }
 
         req.user = user;

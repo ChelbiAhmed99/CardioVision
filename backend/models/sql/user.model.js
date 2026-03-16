@@ -40,7 +40,7 @@ const User = sequelize.define('User', {
         defaultValue: 'user',
     },
     plan: {
-        type: DataTypes.ENUM('Free', 'Professional', 'Enterprise', 'Liberal', 'Center', 'Solidarity'),
+        type: DataTypes.ENUM('Free', 'Professional', 'Enterprise'),
         defaultValue: 'Free',
     },
     scanCount: {

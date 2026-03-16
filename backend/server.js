@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Validate JWT_SECRET
 if (!process.env.JWT_SECRET) {
@@ -41,40 +41,25 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-let PORT = parseInt(process.env.PORT) || 3000;
+const PORT = process.env.PORT || 3000;
 
-// Intelligent Port Management:
-// Only shift if we detect a conflict on localhost/127.0.0.1
-const FLASK_URL_FOR_CHECK = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
-try {
-  const targetUrl = new URL(FLASK_URL_FOR_CHECK);
-  const isFlaskOnLocalhost = targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1';
-
-  if (isFlaskOnLocalhost && targetUrl.port == PORT) {
-    console.log(chalk.bold.yellow(`🚀 LOCALHOST CONFLICT DETECTED: AI and Backend both on port ${PORT}.`));
-    console.log(chalk.bold.yellow('   Shifting Backend to Port 3001 to resolve local collision.'));
-    PORT = PORT == 8080 ? 3000 : PORT + 1; // Try 3000 first, then next port
-  }
-} catch (e) {
-  // Invalid URL in env, proceed with defaults
-}
-
-const isProd = process.env.NODE_ENV === 'production';
-console.log(chalk.cyan(`[INFO] Server starting: PORT=${PORT}, NODE_ENV=${isProd ? 'production' : 'development'}`));
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "CardioVision API running" });
+});
 
 // Professional logging
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 const printBanner = () => {
-  const isProd = process.env.NODE_ENV === 'production';
   console.log(chalk.cyan(`
     ┌─────────────────────────────────────────────────────────┐
     │                                                         │
     │    ${chalk.bold.white('CardioVision API Service')}                       │
-    │    ${isProd ? chalk.bold.green('🌐 Production Mode') : chalk.dim('🛠️  Local Development')}                      │
+    │    ${chalk.dim('Local Development Mode')}                             │
     │                                                         │
-    │    ${chalk.green('🚀 Backend:')}   ${chalk.underline(`${isProd ? process.env.CLIENT_URL : 'http://localhost'}:${PORT}`)}             │
-    │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || (isProd ? 'N/A' : 'http://localhost:8080'))}     │
+    │    ${chalk.green('🚀 Backend:')}   ${chalk.underline('http://localhost:' + PORT)}             │
+    │    ${chalk.blue('🔗 AI Proxy:')}  ${chalk.dim(process.env.FLASK_API_URL || 'http://localhost:8080')}     │
     │                                                         │
     └─────────────────────────────────────────────────────────┘
     `));
@@ -87,21 +72,11 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = [
-        process.env.CLIENT_URL,
-      ].filter(Boolean);
-
-      if (!isProd) {
-        allowedOrigins.push("http://localhost:5173");
-        allowedOrigins.push("http://localhost:3000");
-      }
-
-      // Allow requests with no origin (like mobile apps or curl) or matching allowed origins
+      const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:3000"].filter(Boolean);
       if (!origin || allowedOrigins.some(ao => origin.startsWith(ao))) {
         callback(null, true);
       } else {
-        console.warn(`⚠️ Blocked CORS request from: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(null, true); // Allow all in dev, but process.env.CLIENT_URL is primary
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -111,92 +86,24 @@ app.use(
 
 // Health check route
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "CardioVision API running", port: PORT, env: process.env.NODE_ENV });
+  res.status(200).json({ status: "CardioVision API running" });
 });
-
-// AI Service Target configuration
-const FLASK_URL = process.env.FLASK_API_URL || "http://127.0.0.1:8080";
 
 // Proxy AI requests to Flask backend
 app.use(
   "/api/ai",
-  (req, res, next) => {
-    // Determine if this request is about to loop
-    try {
-      const targetUrl = new URL(FLASK_URL);
-      // Loop check: Only block if it's explicitly localhost on the same port,
-      // OR if the target hostname matches the current request's hostname exactly on the same port.
-      const isExactlySelf = targetUrl.hostname === req.hostname && targetUrl.port == PORT;
-      const isLocalLoop = (targetUrl.hostname === 'localhost' || targetUrl.hostname === '127.0.0.1' || targetUrl.hostname === '0.0.0.0') && targetUrl.port == PORT;
-
-      if (isExactlySelf || isLocalLoop) {
-        console.error(`${chalk.red('⚠ CRITICAL PROXY LOOP DENIED:')} ${req.method} ${req.originalUrl} -> ${FLASK_URL}`);
-        return res.status(508).json({
-          error: "Proxy Loop Detected",
-          message: "The API attempted to call itself. Check FLASK_API_URL settings.",
-          details: { target: FLASK_URL, service_port: PORT, request_host: req.hostname }
-        });
-      }
-    } catch (e) {
-      console.warn("⚠ Proxy Loop Check failed (invalid URL):", e.message);
-    }
-    next();
-  },
-  proxy(FLASK_URL, {
+  proxy(process.env.FLASK_API_URL || "http://127.0.0.1:8080", {
     proxyReqPathResolver: (req) => req.originalUrl.replace("/api/ai", ""),
-    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-      // Stripping cache headers to prevent 304 responses from AI backend
-      delete proxyReqOpts.headers['if-none-match'];
-      delete proxyReqOpts.headers['if-modified-since'];
-      return proxyReqOpts;
-    },
-    userResHeaderDecorator: (headers, userReq, userRes, proxyReq, proxyRes) => {
-      // Enforce no caching for AI responses
-      headers['cache-control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
-      headers['pragma'] = 'no-cache';
-      headers['expires'] = '0';
-      return headers;
-    },
-    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
-      const contentType = proxyRes.headers['content-type'] || '';
-      const bodyString = proxyResData.toString('utf8');
-      const isHtml = contentType.includes('text/html') || bodyString.trim().startsWith('<!doctype') || bodyString.trim().startsWith('<html');
-
-      if (isHtml) {
-        const bodySnippet = bodyString.substring(0, 500);
-        console.error(`${chalk.red('⚠ HTML INTERCEPTED IN PROXY:')} ${userReq.method} ${userReq.originalUrl} (Status: ${proxyRes.statusCode})`);
-        console.error(`${chalk.dim('Snippet:')} ${bodySnippet.replace(/\n/g, ' ')}`);
-
-        // Force JSON error to keep frontend stable
-        userRes.status(proxyRes.statusCode >= 400 ? proxyRes.statusCode : 502);
-        return JSON.stringify({
-          error: "Downstream service returned HTML",
-          status: proxyRes.statusCode,
-          target: FLASK_URL,
-          snippet: bodySnippet
-        });
-      }
-      return proxyResData;
-    },
     proxyErrorHandler: (err, res, next) => {
-      console.error(`${chalk.red('❌ AI Proxy Error:')} ${chalk.yellow(err.code)} - ${err.message}`);
-
-      let hint = "Ensure the AI service is running and FLASK_API_URL is correct.";
-      if (err.code === 'ENOTFOUND') {
-        hint = `Hostname "${err.hostname}" could not be resolved. Check your FLASK_API_URL setting.`;
-      } else if (err.code === 'ECONNREFUSED') {
-        hint = `Connection refused at ${FLASK_URL}. Is the Flask app listening on the correct port?`;
-      }
-
+      console.error(`❌ Proxy Error to Flask: ${err.code} - ${err.message}`);
       res.status(502).json({
-        error: "AI Backend Unreachable",
-        hint: hint,
-        code: err.code,
-        target: FLASK_URL
+        error: "AI Backend unreachable",
+        details: err.code,
+        target: process.env.FLASK_API_URL
       });
     },
     parseReqBody: false,
-    timeout: 60000, // Increased to 60s for heavy AI tasks
+    timeout: 30000, // 30s timeout
   })
 );
 
@@ -220,36 +127,10 @@ app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 const frontendPath = path.resolve(__dirname, "../frontend/dist");
 app.use(express.static(frontendPath));
 
-// 404 handler for API routes (prevent falling through to SPA fallback)
-app.use("/api/*", (req, res) => {
-  console.warn(`${chalk.yellow('⚠️ 404 Not Found (API):')} ${req.method} ${req.originalUrl}`);
-  res.status(404).json({
-    error: "API Route Not Found",
-    path: req.originalUrl
-  });
-});
-
 // SPA fallback route
 app.get("*", (req, res) => {
-  // If it's an API request that reached here, something is wrong
-  if (req.originalUrl.startsWith("/api")) {
-    return res.status(404).json({ error: "API Route Not Found (Internal Fallback)" });
-  }
-
-  console.log(`${chalk.dim('ℹ️ SPA Fallback:')} serving index.html for ${req.originalUrl}`);
+  if (req.originalUrl.startsWith("/api")) return;
   res.sendFile(path.join(frontendPath, "index.html"));
-});
-
-// Global Error Handler
-app.use((err, req, res, next) => {
-  console.error(chalk.red('❌ UNHANDLED SERVER ERROR:'));
-  console.error(chalk.red(err.stack));
-
-  res.status(500).json({
-    error: "Internal Server Error",
-    message: isProd ? "An unexpected error occurred. Please check server logs." : err.message,
-    path: req.originalUrl
-  });
 });
 
 // Start server with proper port & binding
@@ -262,7 +143,7 @@ const startServer = async () => {
       console.log(chalk.green(`✓ Server is listening and ready`));
     });
   } catch (error) {
-    console.error("❌ Startup failed:", error);
+    console.error("❌ Database connection failed:", error);
     process.exit(1); // Exit container if DB fails
   }
 };

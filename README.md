@@ -4,8 +4,6 @@
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 CardioVision is a cutting-edge, clinical-grade platform for automated echocardiography analysis. By leveraging advanced computer vision and deep learning, CardioVision provides precise measurements of key cardiac metrics, empowering clinicians with faster, more accurate diagnostic insights.
 
@@ -18,7 +16,7 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 -   **Dynamic Visualization**: Interactive dashboards with real-time analysis overlays (masks, strain maps, and Bull's-eye plots).
 -   **Unified Patient Management**: Securely manage patient history, video uploads, and diagnostic reports in one place.
 -   **Admin Control Center**: Comprehensive panel for site settings, audit logging, and growth analytics.
--   **Scalable Architecture**: Dual-service backend design (Express/Node.js + Flask/Python) orchestrated via Docker.
+-   **Scalable Architecture**: Dual-service backend design (Express/Node.js + Flask/Python) for efficient orchestration.
 
 ---
 
@@ -44,14 +42,11 @@ CardioVision is a cutting-edge, clinical-grade platform for automated echocardio
 ## Getting Started
 
 ### Prerequisites
--   [Docker](https://www.docker.com/get-started)
--   [Docker Compose](https://docs.docker.com/compose/install/)
--   [Node.js](https://nodejs.org/) (for local development)
--   [Python 3.9+](https://www.python.org/) (for local AI service)
+-   [Node.js](https://nodejs.org/) (v18+)
+-   [Python 3.9+](https://www.python.org/)
+-   [FFmpeg](https://ffmpeg.org/) (for video processing)
 
-### Quick Start with Docker
-
-The easiest way to run CardioVision is using Docker Compose:
+### Quick Start (Local Development)
 
 1.  **Clone the repository**:
     ```bash
@@ -60,14 +55,31 @@ The easiest way to run CardioVision is using Docker Compose:
     ```
 
 2.  **Environment Setup**:
-    Create a `.env` file in the root directory based on `.env.example`.
+    Create a `.env` file in the root directory based on `.env.example`. Ensure `FLASK_API_URL` is set to `http://localhost:8080`.
 
-3.  **Run with Docker Compose**:
+3.  **Install Dependencies**:
     ```bash
-    docker-compose up --build
+    # Root & Backend
+    npm install
+    
+    # Frontend
+    cd frontend && npm install && cd ..
+    
+    # Python AI Backend
+    # (Recommended to use a virtual environment)
+    python -m venv venv
+    source venv/bin/activate  # Linux/macOS
+    pip install -r backend/requirements.txt
     ```
 
-The application will be available at your custom Vercel URL.
+4.  **Run Services**:
+    You need to run three separate services:
+    
+    - **Orchestration Server**: `npm run server` (Root)
+    - **AI Engine**: `python backend/app.py`
+    - **Frontend Dashboard**: `cd frontend && npm run dev`
+
+The application will be available at `http://localhost:5173`.
 
 ---
 
@@ -80,9 +92,6 @@ CardioVision/
 ├── Model Training and Development/ # Scripts for model research & fine-tuning
 ├── growth_resources/      # Waitlist & marketing assets
 ├── imgs/                  # Project media and screenshots
-├── Dockerfile             # Multi-stage Dockerfile for Frontend & Express
-├── Dockerfile.flask       # Dockerfile for Flask AI Service
-├── docker-compose.yml     # Docker orchestration for all services
 └── cardiovision.sqlite    # Local SQLite database
 ```
 

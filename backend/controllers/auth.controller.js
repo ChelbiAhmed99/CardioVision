@@ -35,7 +35,7 @@ export const signup = async (req, res) => {
             fullName,
             email,
             password: hashedPassword,
-            plan: plan || 'Liberal',
+            plan: plan || 'Free',
             scanResetDate,
             scanCount: 0
         });
