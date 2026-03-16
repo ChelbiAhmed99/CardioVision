@@ -23,7 +23,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-3000}
-      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai:8080}
+      - FLASK_API_URL=${FLASK_API_URL:-http://flask-ai.railway.internal:8080}
       - JWT_SECRET=${JWT_SECRET}
       - CLIENT_URL=${CLIENT_URL}
     volumes:
